@@ -61,3 +61,7 @@ Não modificar sem autorização prévia do autor.
 msgbox.py:
 ⚠️ Este ficheiro é parte experimental do projeto.
 Não modificar sem autorização prévia do autor.
+
+## 📜 Licença
+
+Este projeto está licenciado sob os termos da [Creative Commons BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/).
