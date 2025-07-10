@@ -16,7 +16,6 @@ Programa concebido para prever números prováveis no EuroMilhões, com base em 
 - 📊 Análise estatística de sorteios anteriores
 - 🔢 Geração de combinações prováveis com base em:
   - Cadeias de Markov
-  - Distribuição de Poisson
 - 📈 Visualização de padrões e frequências
 - 🧠 Algoritmo de previsão com base em dados reais
 - 🔄 Sistema de atualizações automáticas
