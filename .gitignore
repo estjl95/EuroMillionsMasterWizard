@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+*.exe
+*.bat
+*.spec
+dist/
+build/
+atualizacao_temp/
