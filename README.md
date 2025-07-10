@@ -51,3 +51,11 @@ Foi concebido para aumentar eficazmente as probabilidades de ganhar o prémio m�
 simulador.py:
 ⚠️ Este ficheiro é parte experimental do projeto.
 Não modificar sem autorização prévia do autor.
+
+main.py:
+⚠️ Este ficheiro é parte experimental do projeto.
+Não modificar sem autorização prévia do autor.
+
+interface.py:
+⚠️ Este ficheiro é parte experimental do projeto.
+Não modificar sem autorização prévia do autor.
