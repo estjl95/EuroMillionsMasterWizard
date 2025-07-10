@@ -47,3 +47,7 @@ python main.py
 
 Este programa é apenas para fins educativos e estatísticos.
 Foi concebido para aumentar eficazmente as probabilidades de ganhar o prémio máximo do jogo, mas não garante resultados nem substitui o fator sorte.
+
+# simulador.py
+# ⚠️ Este ficheiro é parte experimental do projeto.
+# Não modificar sem autorização prévia do autor.
