@@ -8,8 +8,8 @@ from PIL import Image, ImageTk
 from interface import InterfaceApp
 from tkinter import messagebox
 
-VERSAO_LOCAL = "1.0"
-URL_VERSAO = "https://raw.githubusercontent.com/estjl95/versao/main/versao.txt"  # Substitui pelo link direto
+VERSAO_LOCAL = "1.1"
+URL_VERSAO = "https://raw.githubusercontent.com/estjl95/EuroMillionsMasterWizard/main/versao.txt"  # Substitui pelo link direto
 
 def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))

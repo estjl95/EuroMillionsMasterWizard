@@ -1,5 +1,4 @@
 import pandas as pd
-import random
 from collections import defaultdict
 
 class EuroMillionsMasterWizard:
@@ -56,47 +55,6 @@ class EuroMillionsMasterWizard:
     # 🧪 Obter todos os valores únicos de uma coluna
     def valores_unicos(self, coluna):
         return sorted(self.df[coluna].dropna().astype(int).unique().tolist())
-
-    def gerar_chave_por_markov(self):
-        chave_numeros = set()
-        chave_estrelas = set()
-
-        # Gerar transições se ainda não existirem
-        for col in self.col_numeros + self.col_estrelas:
-            if col not in self.transicoes:
-                self.gerar_cadeia_markov(col)
-
-        # Usar os últimos valores do histórico como ponto de partida
-        ultima_linha = self.df.iloc[-1]
-
-        # Prever 5 números
-        for col in self.col_numeros:
-            valor_atual = int(ultima_linha[col])
-            previsao = self.prever_por_markov(col, valor_atual)
-            if previsao and previsao not in chave_numeros and 1 <= previsao <= 50:
-                chave_numeros.add(previsao)
-            else:
-                # Se não houver previsão ou for repetido, escolher aleatório
-                while True:
-                    aleatorio = random.randint(1, 50)
-                    if aleatorio not in chave_numeros:
-                        chave_numeros.add(aleatorio)
-                        break
-
-        # Prever 2 estrelas
-        for col in self.col_estrelas:
-            valor_atual = int(ultima_linha[col])
-            previsao = self.prever_por_markov(col, valor_atual)
-            if previsao and previsao not in chave_estrelas and 1 <= previsao <= 12:
-                chave_estrelas.add(previsao)
-            else:
-                while True:
-                    aleatorio = random.randint(1, 12)
-                    if aleatorio not in chave_estrelas:
-                        chave_estrelas.add(aleatorio)
-                        break
-
-        return sorted(chave_numeros), sorted(chave_estrelas)
 
     def estatisticas_por_coluna(self, coluna):
         serie = self.df[coluna].dropna().astype(int)

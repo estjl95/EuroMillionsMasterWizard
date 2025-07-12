@@ -1,1 +1,1 @@
-1.0|https://github.com/estjl95/EuroMillionsMasterWizard_v1.0.exe
+1.1|https://github.com/estj95/EuroMillionsMasterWizard/releases/download/v1.1/EuroMillionsMasterWizard.exe
