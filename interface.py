@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import tkinter as tk
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+from atualizador import verificar_atualizacao
 from tkinter import ttk, messagebox, filedialog
 from simulador import EuroMillionsMasterWizard
 from scipy.stats import poisson
@@ -9,7 +12,7 @@ from scipy.stats import poisson
 class InterfaceApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("EuroMillions Master Wizard v1.1")
+        self.root.title("EuroMillions Master Wizard v1.2")
         self.root.geometry("540x520")
 
         self.simulador = EuroMillionsMasterWizard("dados/resultados_euromilhoes.xlsx")
@@ -28,7 +31,7 @@ class InterfaceApp:
         # Título
         self.label_titulo = ttk.Label(
             self.root,
-            text="🔢 EuroMillions Master Wizard v1.1",
+            text="🔢 EuroMillions Master Wizard v1.2",
             font=("Segoe UI", 16, "bold")
         )
         self.label_titulo.pack(pady=10)
@@ -67,6 +70,7 @@ class InterfaceApp:
         # Importar/exportar
         self.botao_importar = ttk.Button(self.tab_utilitarios)
         self.botao_exportar = ttk.Button(self.tab_utilitarios)
+        self.botao_atualizar = ttk.Button(self.tab_utilitarios)
 
         # Resultado visual abaixo dos separadores
         self.resultado = tk.Label(self.root, text="", font=("Segoe UI Emoji", 11))
@@ -89,12 +93,12 @@ class InterfaceApp:
 
         ttk.Label(
             self.tab_previsoes,
-            text="Prever chave completa com Cadeia de Markov:",
+            text="Prever padrões sequenciais com a Cadeia de Markov:",
             font=("Segoe UI", 10, "bold")
         ).pack(pady=10)
 
         self.botao_multi_prever.config(
-            text="🔮 Prever sequência completa",
+            text="🔮 Prever sequências",
             command=self.prever_sequencia
         )
         self.botao_multi_prever.pack(pady=5)
@@ -164,6 +168,19 @@ class InterfaceApp:
 
         self.botao_exportar.config(text="💾 Exportar previsões",command=self.exportar_previsoes)
         self.botao_exportar.pack(pady=5)
+
+        ttk.Label(
+            self.tab_utilitarios,
+            text="Atualizar para a versão mais recente:",
+            font=("Segoe UI", 10, "bold")
+        ).pack(pady=(15, 5))
+
+        self.botao_atualizar = ttk.Button(
+            self.tab_utilitarios,
+            text="🔄 Verificar atualizações",
+            command=verificar_atualizacao
+        )
+        self.botao_atualizar.pack(pady=5)
 
     def mostrar_estatisticas(self):
         posicao_nome = self.combo_estatistica.get()
@@ -301,6 +318,7 @@ class InterfaceApp:
 
     def prever_sequencia(self):
         previsoes = {}
+        usados = set()  # Para evitar repetições de números ou estrelas
 
         for nome, coluna in self.posicoes.items():
             # Garante que há transições geradas
@@ -313,9 +331,23 @@ class InterfaceApp:
                 continue
 
             try:
-                origem = max(trans.items(), key=lambda item: sum(item[1].values()))[0]
-                previsao = self.simulador.prever_por_markov(coluna, origem)
+                # Seleciona até 3 origens com maior volume de transições
+                origens_fortes = sorted(
+                    trans.items(),
+                    key=lambda item: sum(item[1].values()),
+                    reverse=True
+                )[:3]
+
+                previsao = None
+                for origem, destinos in origens_fortes:
+                    tentativa = self.simulador.prever_por_markov(coluna, origem)
+                    if tentativa is not None and tentativa not in usados:
+                        previsao = tentativa
+                        usados.add(previsao)
+                        break
+
                 previsoes[nome] = previsao if previsao is not None else "?"
+
             except ValueError:
                 previsoes[nome] = "?"
 
@@ -327,10 +359,43 @@ class InterfaceApp:
         ])
 
         texto = (
-            f"🔮 Sequência prevista com Markov ordem 1:\n"
+            f"🔮 Sequência prevista:\n"
             f"Números: {numeros}\nEstrelas: {estrelas}"
         )
+
         self.texto_historico.insert("end", texto + "\n\n")
+        self.texto_historico.see("end")
+        self.mostrar_transicoes_percentuais()
+        self.mostrar_destinos_provaveis()
+
+    def mostrar_transicoes_percentuais(self):
+        self.texto_historico.insert("end", "📊 Transições percentuais por posição:\n")
+        for nome, coluna in self.posicoes.items():
+            percentuais = self.simulador.transicoes_percentuais.get(coluna, {})
+            if not percentuais:
+                continue
+
+            self.texto_historico.insert("end", "-" * 40 + "\n")
+            self.texto_historico.insert("end", f"🔸 {nome}:\n")
+            for origem, destinos in percentuais.items():
+                linha = f"  {origem} → " + ", ".join(
+                    f"{destino} ({prob}%)" for destino, prob in destinos.items()
+                )
+                self.texto_historico.insert("end", linha + "\n")
+        self.texto_historico.insert("end", "\n")
+        self.texto_historico.see("end")
+
+    def mostrar_destinos_provaveis(self):
+        self.texto_historico.insert("end", "🔍 Destinos prováveis para cada origem:\n")
+        for nome, coluna in self.posicoes.items():
+            transicoes = self.simulador.transicoes_percentuais.get(coluna, {})
+            # A origem pode ser o valor que saiu na chave anterior ou o usado no 'loop'
+            for origem in transicoes:
+                destinos = transicoes[origem]
+                mais_fortes = sorted(destinos.items(), key=lambda x: x[1], reverse=True)[:5]
+                linha = f"🔸 {nome} ({origem}) → " + ", ".join(f"{d} ({p}%)" for d, p in mais_fortes)
+                self.texto_historico.insert("end", linha + "\n")
+        self.texto_historico.insert("end", "\n")
         self.texto_historico.see("end")
 
     @staticmethod
@@ -483,3 +548,10 @@ class InterfaceApp:
                 messagebox.showinfo("Sucesso", "Previsões exportadas com sucesso!")
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao exportar:\n{e}")
+
+    @staticmethod
+    def verificar_atualizacao():
+        try:
+            verificar_atualizacao()
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao verificar atualizações: {e}")

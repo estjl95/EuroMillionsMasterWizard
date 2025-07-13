@@ -1,18 +1,18 @@
 [Setup]
 AppName=EuroMillions Master Wizard 
-AppVersion=1.1
+AppVersion=1.2
 AppPublisher=José Estácio
 AppComments=Programa concebido para prever números prováveis com base em estatísticas reais do EuroMilhões, utilizando métodos matemáticos para aumentar eficazmente as probabilidades de ganhar o jackpot.
 AppCopyright=© 2025 José Estácio
-DefaultDirName={pf}\EuroMillionsMasterWizard v1.1
-DefaultGroupName=EuroMillionsMasterWizard v1.1
-OutputDir={userdocs}\EuroMillions Master Wizard v1.1
+DefaultDirName={pf}\EuroMillionsMasterWizard v1.2
+DefaultGroupName=EuroMillionsMasterWizard v1.2
+OutputDir={userdocs}\EuroMillions Master Wizard v1.2
 OutputBaseFilename=Setup
 SetupIconFile=icone.ico
 Compression=lzma
 SolidCompression=yes
 LicenseFile=LICENSE.txt
-UninstallDisplayName=EuroMillions Master Wizard v1.1
+UninstallDisplayName=EuroMillions Master Wizard v1.2
 UninstallDisplayIcon={app}\icone.ico
 UninstallFilesDir={app}\dados
 

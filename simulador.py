@@ -7,6 +7,7 @@ class EuroMillionsMasterWizard:
         self.col_numeros = [1, 2, 3, 4, 5]
         self.col_estrelas = ["Star 1", "Star 2"]
         self.transicoes = {}  # Armazena transições por coluna
+        self.transicoes_percentuais = {}
 
     # 🧠 Gera a cadeia de Markov para uma coluna (posição)
     def gerar_cadeia_markov(self, coluna):
@@ -18,15 +19,15 @@ class EuroMillionsMasterWizard:
             seguinte = valores[i + 1]
             transicoes[atual][seguinte] += 1
 
-        transicoes_percentuais = {}
-        for origem, destinos in transicoes.items():
-            total = sum(destinos.values())
-            transicoes_percentuais[origem] = {
-                destino: round((freq / total) * 100, 2)
+        self.transicoes[coluna] = transicoes  # Mantém valores brutos
+
+        self.transicoes_percentuais[coluna] = {
+            origem: {
+                destino: round((freq / sum(destinos.values())) * 100, 2)
                 for destino, freq in destinos.items()
             }
-
-        self.transicoes[coluna] = transicoes_percentuais
+            for origem, destinos in transicoes.items()
+        }
 
     # 🔮 Prever o valor provável após um número
     def prever_por_markov(self, coluna, valor_atual):
