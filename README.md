@@ -1,24 +1,22 @@
 # 🎲 EuroMillions Master Wizard
 
-![Versão](https://img.shields.io/badge/versão-1.0-blue)
+![Versão](https://img.shields.io/badge/versão-1.1-blue)
 ![Licença](https://img.shields.io/badge/licença-CC--BY--NC--ND%204.0-lightgrey)
 ![Python](https://img.shields.io/badge/python-3.11+-yellow)
 
-**Versão 1.0**  
-Programa concebido para prever números prováveis no EuroMilhões, com base em dados reais e métodos matemáticos avançados.
+**Versão 1.1**  
+Nesta versão do EuroMillions Master Wizard estão incluídas novas funcionalidades, entre elas a utilização de modelos estatísticos para sugerir combinações de números com base em dados históricos e probabilidades reais e a Distribuição de Poisson para os números e as estrelas, com interface gráfico melhorada com histórico de combinações.
 
 ![splash](splash.png)
 
 ---
 
-## ✨ Funcionalidades
+## 🆕 Novidades na v1.1
 
-- 📊 Análise estatística de sorteios anteriores
-- 🔢 Geração de combinações prováveis com base em:
-  - Cadeia de Markov
-- 📈 Visualização de padrões e frequências
-- 🧠 Algoritmo de previsão com base em dados reais
-- 🔄 Sistema de atualizações automáticas
+- 🔮 Previsão com Cadeia de Markov (ordem 1)
+- 📊 Análise estatística com Distribuição de Poisson
+- 🧠 Chaves sugeridas com base empírica
+- 🎨 Interface gráfica melhorada com histórico de combinações
 
 ---
 
