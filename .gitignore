@@ -1,34 +1,26 @@
-# ⚙️ Ficheiros e pastas geradas por Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.log
-
-# 🔧 Ambiente virtual
+# Ambiente virtual
 .venv/
-.env/
+env/
+__pycache__/
+*.pyc
 
-# 🏗️ Compilação com PyInstaller
-build/
-dist/
-*.spec
-
-# 🖼️ Recursos e temporários
-*.png
-*.ico
-*.bak
+# Ficheiros temporários e de sistema
+*.log
 *.tmp
-
-# 💻 Sistema operacional
+*.bak
 .DS_Store
 Thumbs.db
 
-# 🔍 Editor (PyCharm, VSCode, etc.)
-.idea/
-.vscode/
-*.iml
+# Ficheiros de instalação e compilação
+*.exe
+*.zip
+*.msi
+*.spec
 
-# 🔐 Chaves, senhas, config local
-*.key
-*.pem
-*.db
+# Dados e resultados
+dados/
+resultados_euromilhoes.xlsx
+
+# Ficheiros gerados por PyInstaller
+build/
+dist/
