@@ -548,10 +548,3 @@ class InterfaceApp:
                 messagebox.showinfo("Sucesso", "Previsões exportadas com sucesso!")
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao exportar:\n{e}")
-
-    @staticmethod
-    def verificar_atualizacao():
-        try:
-            verificar_atualizacao()
-        except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao verificar atualizações: {e}")
