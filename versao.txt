@@ -1,6 +1,1 @@
-Versão: 1.3
-Data de lançamento: 15/07/2025
-Tipo: Release estável
-Descrição: Lógica híbrida, interface refinada, atualização automática, previsão estatística.
-Repositório: https://github.com/estjl95/EuroMillionsMasterWizard
-Release oficial: https://github.com/estjl95/EuroMillionsMasterWizard/releases/tag/v1.3
+v1.3|https://github.com/estjl95/EuroMillionsMasterWizard/releases/download/v1.3/Setup.exe
