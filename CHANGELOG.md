@@ -1,8 +1,9 @@
 📦 EuroMillions Master Wizard — Changelog v1.3
-Data de lançamento: [coloca aqui a data real quando publicares]
+Data de lançamento: 15/07/2025
 Versão: v1.3
 
-🔧 Novidades e Melhorias
+🔧 Novidades e Melhorias:
+
 🪄 Interação inteligente com previsão
 - Adicionado sistema de escolha: o utilizador pode comparar a chave oficial com:
 - A sequência prevista gerada pelo modelo (Markov)
