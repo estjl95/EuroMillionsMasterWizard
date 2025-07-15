@@ -1,6 +1,6 @@
 # 🎲 EuroMillions Master Wizard
 
-![Versão](https://img.shields.io/badge/versão-1.3-blue)
+![Versão](https://img.shields.io/github/v/release/estjl95/EuroMillionsMasterWizard)
 ![Licença](https://img.shields.io/badge/licença-CC--BY--NC--ND%204.0-lightgrey)
 ![Python](https://img.shields.io/badge/python-3.11+-yellow)
 
