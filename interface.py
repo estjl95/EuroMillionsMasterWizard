@@ -367,6 +367,7 @@ class InterfaceApp:
         self.texto_historico.see("end")
         self.mostrar_transicoes_percentuais()
         self.mostrar_destinos_provaveis()
+        self.analisar_previstos(previsoes)
 
     def mostrar_transicoes_percentuais(self):
         self.texto_historico.insert("end", "📊 Transições percentuais por posição:\n")
@@ -395,6 +396,31 @@ class InterfaceApp:
                 mais_fortes = sorted(destinos.items(), key=lambda x: x[1], reverse=True)[:5]
                 linha = f"🔸 {nome} ({origem}) → " + ", ".join(f"{d} ({p}%)" for d, p in mais_fortes)
                 self.texto_historico.insert("end", linha + "\n")
+        self.texto_historico.insert("end", "\n")
+        self.texto_historico.see("end")
+
+    def analisar_previstos(self, previsoes):
+        self.texto_historico.insert("end", "📊 Análise da frequência histórica:\n", "titulo")
+
+        for nome, coluna in self.posicoes.items():
+            if nome not in previsoes or previsoes[nome] == "?":
+                continue
+
+            valor = previsoes[nome]
+            stats = self.simulador.estatisticas_por_coluna(coluna)
+            freq = stats["frequencias"].get(valor, 0)
+            media = stats["media"]
+
+            # 🧮 Classificação
+            if freq >= media + 2:
+                classe = "🔴 Quente"
+            elif freq <= media - 2:
+                classe = "🔵 Frio"
+            else:
+                classe = "🟡 Morno"
+
+            self.texto_historico.insert("end", f"🔸 {nome}: {valor} → {freq} ocorrências ({classe})\n")
+
         self.texto_historico.insert("end", "\n")
         self.texto_historico.see("end")
 
