@@ -5,67 +5,91 @@ import os
 import sys
 import subprocess
 
-VERSAO_LOCAL = "1.2"
+VERSAO_LOCAL = "1.3"
 URL_VERSAO = "https://raw.githubusercontent.com/estjl95/EuroMillionsMasterWizard/main/versao.txt"
+FICHEIRO_IGNORE = os.path.join(os.path.expanduser("~"), ".wizard_ignorar_versao.txt")
 
 def verificar_atualizacao():
     try:
-        resposta = requests.get(URL_VERSAO, timeout=5)
-        if resposta.status_code == 200:
-            conteudo = resposta.text.strip()
-            partes = conteudo.split("|")
-            if len(partes) == 2:
-                versao_remota, link_download = partes
-                if versao_remota != VERSAO_LOCAL:
-                    janela = tk.Toplevel()
-                    janela.title("Atualização disponível")
-                    janela.geometry("400x150")
-                    janela.resizable(False, False)
+        resposta = requests.get(URL_VERSAO, timeout=15)
+        if resposta.status_code != 200:
+            messagebox.showerror("Erro", f"Erro ao aceder ao servidor (código {resposta.status_code})")
+            return
 
-                    label = tk.Label(janela, text=f"Nova versão disponível: {versao_remota}", font=("Segoe UI", 11))
-                    label.pack(pady=10)
+        linhas = resposta.text.strip().splitlines()
+        info = {}
+        for linha in linhas:
+            if "=" in linha:
+                chave, valor = linha.split("=", 1)
+                info[chave.strip()] = valor.strip()
+            elif linha.startswith("v"):
+                info["versao"] = linha.strip()
 
-                    info = tk.Label(janela, text="Clique abaixo para atualizar automaticamente.")
-                    info.pack()
+        versao_remota = info.get("versao")
+        link_download = info.get("link")
+        data_lancamento = info.get("data", "Data não especificada")
+        descricao = info.get("descricao", "Sem descrição disponível.")
 
-                    def atualizar():
-                        try:
-                            pasta_temp = os.path.join(os.path.dirname(sys.executable), "atualizacao_temp")
-                            os.makedirs(pasta_temp, exist_ok=True)
+        # Verificar se o utilizador ignorou esta versão
+        if os.path.exists(FICHEIRO_IGNORE):
+            with open(FICHEIRO_IGNORE, "r") as f:
+                ignorada = f.read().strip()
+                if ignorada == versao_remota:
+                    return  # Ignorar verificação
 
-                            novo_exe_path = os.path.join(pasta_temp, "novo.exe")
-                            with requests.get(link_download, stream=True) as r:
-                                r.raise_for_status()
-                                with open(novo_exe_path, 'wb') as f:
-                                    for chunk in r.iter_content(chunk_size=8192):
-                                        if chunk:
-                                            f.write(chunk)
+        if versao_remota and versao_remota != VERSAO_LOCAL and link_download:
+            janela = tk.Toplevel()
+            janela.title("🆕 Atualização disponível")
+            janela.geometry("480x220")
+            janela.resizable(False, False)
 
-                            script_path = os.path.join(pasta_temp, "atualizar.bat")
-                            atual_path = sys.executable.replace('"', '')
+            tk.Label(janela, text=f"Nova versão: {versao_remota}", font=("Segoe UI", 11, "bold")).pack(pady=6)
+            tk.Label(janela, text=f"📅 Lançamento: {data_lancamento}", font=("Segoe UI", 10)).pack()
+            tk.Label(janela, text=f"📝 Notas: {descricao}", wraplength=440, justify="left", font=("Segoe UI", 9)).pack(pady=6)
 
-                            with open(script_path, 'w') as f:
-                                f.write(f"""@echo off
+            def atualizar():
+                try:
+                    pasta_temp = os.path.join(os.path.dirname(sys.executable), "atualizacao_temp")
+                    os.makedirs(pasta_temp, exist_ok=True)
+
+                    novo_exe = os.path.join(pasta_temp, "novo.exe")
+                    with requests.get(link_download, stream=True) as r:
+                        r.raise_for_status()
+                        with open(novo_exe, 'wb') as ficheiro_exe:
+                            for chunk in r.iter_content(8192):
+                                if chunk:
+                                    ficheiro_exe.write(chunk)
+
+                    bat_path = os.path.join(pasta_temp, "atualizar.bat")
+                    atual_path = sys.executable.replace('"', '')
+                    with open(bat_path, 'w') as ficheiro_bat:
+                        ficheiro_bat.write(f"""@echo off
 timeout /t 2 >nul
 del "{atual_path}" >nul
-move "{novo_exe_path}" "{atual_path}"
+move "{novo_exe}" "{atual_path}"
 start "" "{atual_path}"
 rmdir /s /q "{pasta_temp}"
 """)
 
-                            subprocess.Popen(['cmd', '/c', script_path])
-                            sys.exit()
+                    subprocess.Popen(['cmd', '/c', bat_path])
+                    sys.exit()
+                except Exception as erro:
+                    messagebox.showerror("Erro", f"Erro ao atualizar: {erro}")
 
-                        except Exception as erro:
-                            messagebox.showerror("Erro", f"Erro ao atualizar: {erro}")
+            def ignorar():
+                with open(FICHEIRO_IGNORE, "w") as ficheiro_ignorar:
+                    ficheiro_ignorar.write(versao_remota)
+                janela.destroy()
 
-                    botao = tk.Button(janela, text="Atualizar agora", command=atualizar)
-                    botao.pack(pady=10)
+            # Botões
+            tk.Button(janela, text="🔄 Atualizar agora", command=atualizar).pack(pady=5)
+            tk.Button(janela, text="⏸ Ignorar esta versão", command=ignorar).pack()
 
-                    janela.transient(tk.Tk())
-                    janela.grab_set()
-                    janela.mainloop()
-                else:
-                    messagebox.showinfo("✅ Atualização", f"Já estás com a versão mais recente: v{VERSAO_LOCAL}")
+            janela.transient(tk.Tk())
+            janela.grab_set()
+            janela.mainloop()
+        else:
+            messagebox.showinfo("✅ Atualização", f"Já estás com a versão mais recente: v{VERSAO_LOCAL}")
+
     except Exception as e:
         messagebox.showerror("Erro", f"Falha ao verificar atualização: {e}")
