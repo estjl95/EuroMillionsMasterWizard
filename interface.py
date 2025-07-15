@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from atualizador import verificar_atualizacao
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, simpledialog
 from simulador import EuroMillionsMasterWizard
 from scipy.stats import poisson
 
@@ -451,73 +451,84 @@ class InterfaceApp:
         self.texto_historico.see("end")
 
     def comparar_com_chave_oficial(self):
-        previsao_completa = {}
-        for nome, coluna in self.posicoes.items():
-            if coluna not in self.simulador.transicoes:
-                self.simulador.gerar_cadeia_markov(coluna)
+        escolha = messagebox.askquestion( "Comparar com chave oficial", "Queres comparar com a sequência prevista pelo sistema (Markov)?\nSe responderes 'Não', poderás introduzir manualmente a sequência que jogaste.",
+                                          icon="question")
+        if escolha == "sim": self.comparar_com_chave_oficial()
+        elif escolha != "não":
+            # 📥 Pedir sequência prevista
+            num_escolhidos_txt = simpledialog.askstring("5 números (Manualmente)",
+                                                  "🔢 Números previstos (5 separados por vírgulas):")
+            estrelas_escolhidas_txt = simpledialog.askstring("2 estrelas (Manualmente)",
+                                                      "🌟 Estrelas previstas (2 separadas por vírgulas):")
 
-            trans = self.simulador.transicoes.get(coluna, {})
-            if not trans:
-                previsao_completa[nome] = "?"
-                continue
+            if not num_escolhidos_txt or not estrelas_escolhidas_txt:
+                self.texto_historico.insert("end", "⚠️ Operação cancelada pelo utilizador.\n\n")
+                return
 
             try:
-                origem = max(trans, key=lambda k: sum(trans[k].values()))
-                previsao = self.simulador.prever_por_markov(coluna, origem)
-                previsao_completa[nome] = previsao if previsao is not None else "?"
-            except ValueError:
-                previsao_completa[nome] = "?"
+                numeros_previstos = [int(n.strip()) for n in num_escolhidos_txt.split(",") if n.strip().isdigit()]
+                estrelas_previstas = [int(e.strip()) for e in estrelas_escolhidas_txt.split(",") if e.strip().isdigit()]
+                if len(numeros_previstos) != 5 or len(estrelas_previstas) != 2:
+                    self.texto_historico.insert("end",
+                                                "⚠️ Erro: introduz exatamente 5 números e 2 estrelas na previsão.\n\n")
+                    return
+            except AttributeError:
+                self.texto_historico.insert("end", "⚠️ Erro ao processar a sequência prevista.\n\n")
+                return
 
-        # Obter chave oficial dinâmica
-        numeros_oficiais, estrelas_oficiais, data_txt = self.obter_chave_oficial()
-        if not numeros_oficiais or not estrelas_oficiais:
-            return
+            # 📥 Pedir chave oficial
+            num_oficial_txt = simpledialog.askstring("Chave Oficial", "🎯 Números oficiais (5 separados por vírgulas):")
+            estrela_oficial_txt = simpledialog.askstring("Chave Oficial",
+                                                         "🎯 Estrelas oficiais (2 separadas por vírgulas):")
 
-        # Separar previsão
-        numeros_previstos = [
-            previsao_completa.get("N1"),
-            previsao_completa.get("N2"),
-            previsao_completa.get("N3"),
-            previsao_completa.get("N4"),
-            previsao_completa.get("N5")
-        ]
-        estrelas_previstas = [
-            previsao_completa.get("Estrela 1"),
-            previsao_completa.get("Estrela 2")
-        ]
+            if not num_oficial_txt or not estrela_oficial_txt:
+                self.texto_historico.insert("end", "⚠️ Operação cancelada pelo utilizador.\n\n")
+                return
 
-        total_n = sum(n in numeros_oficiais for n in numeros_previstos)
-        total_e = sum(e in estrelas_oficiais for e in estrelas_previstas)
+            try:
+                numeros_oficiais = [int(n.strip()) for n in num_oficial_txt.split(",") if n.strip().isdigit()]
+                estrelas_oficiais = [int(e.strip()) for e in estrela_oficial_txt.split(",") if e.strip().isdigit()]
+                if len(numeros_oficiais) != 5 or len(estrelas_oficiais) != 2:
+                    self.texto_historico.insert("end",
+                                                "⚠️ Erro: introduz exatamente 5 números e 2 estrelas na chave oficial.\n\n")
+                    return
+            except AttributeError:
+                self.texto_historico.insert("end", "⚠️ Erro ao processar a chave oficial.\n\n")
+                return
 
-        # Inserir no histórico com etiquetas visuais
-        self.texto_historico.insert("end", f"🧮 Comparação com chave oficial ({data_txt}):\n", "titulo")
-        self.texto_historico.insert("end", "🔮 Previsão: ")
+            data_txt = "Resultado"
 
-        for num in numeros_previstos:
-            if num in numeros_oficiais:
-                self.texto_historico.insert("end", f"{num} ", "numero_certo")
-            else:
-                self.texto_historico.insert("end", f"{num} ")
+            # ✅ Contagem de acertos
+            total_n = sum(n in numeros_oficiais for n in num_escolhidos_txt)
+            total_e = sum(e in estrelas_oficiais for e in estrelas_escolhidas_txt)
 
-        self.texto_historico.insert("end", "+ ")
+            # 🖼️ Inserir no histórico
+            self.texto_historico.insert("end", f"🧮 Comparação com chave oficial ({data_txt}):\n", "titulo")
+            self.texto_historico.insert("end",
+                                        f"🔮 Chave registada manualmente: {', '.join(map(str, num_escolhidos_txt))} + {', '.join(map(str, estrelas_escolhidas_txt))}\n")
+            self.texto_historico.insert("end",
+                                        f"🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n")
+            self.texto_historico.insert("end", f"✅ Acertos: {total_n} números, {total_e} estrelas\n")
 
-        for estrela in estrelas_previstas:
-            if estrela in estrelas_oficiais:
-                self.texto_historico.insert("end", f"{estrela} ", "estrela_certa")
-            else:
-                self.texto_historico.insert("end", f"{estrela} ")
+            if all(n in numeros_oficiais for n in num_escolhidos_txt):
+                self.texto_historico.insert("end", "🎯 Quinteto completo de números acertado!\n", "numeros_certos")
 
-        self.texto_historico.insert("end",
-                                    f"\n🎯 Chave oficial: {', '.join(str(n) for n in numeros_oficiais)} + {', '.join(str(e) for e in estrelas_oficiais)}\n")
-        self.texto_historico.insert("end", f"✅ Acertos: {total_n} números, {total_e} estrelas\n\n")
-        self.texto_historico.see("end")
+            if all(e in estrelas_oficiais for e in estrelas_escolhidas_txt):
+                self.texto_historico.insert("end", "🌟 Par completo de estrelas acertado!\n", "par_estrela_certo")
 
-        # Resultado também no label
-        texto_resultado = f"🔮 Previsão: {', '.join(str(n) for n in numeros_previstos)} + {', '.join(str(e) for e in estrelas_previstas)}\n"
-        texto_resultado += f"🎯 Chave oficial: {', '.join(str(n) for n in numeros_oficiais)} + {', '.join(str(e) for e in estrelas_oficiais)}\n"
-        texto_resultado += f"✅ Acertos: {total_n} números, {total_e} estrelas"
+            if all(n in numeros_oficiais for n in num_escolhidos_txt) & all(
+                    e in estrelas_oficiais for e in estrelas_escolhidas_txt):
+                self.texto_historico.insert("end", "✅ Parabéns! Ganhaste o jackpot do EuroMillions!\n",
+                                            "numeros_certos, par_estrela_certo")
 
-        self.resultado.config(text=texto_resultado)
+            self.texto_historico.insert("end", "\n")
+            self.texto_historico.see("end")
+
+            texto_resultado = (
+                f"🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n"
+                f"✅ Acertos: {total_n} números, {total_e} estrelas"
+            )
+            self.resultado.config(text=texto_resultado)
 
     def importar_ficheiro(self):
         caminho = filedialog.askopenfilename(
