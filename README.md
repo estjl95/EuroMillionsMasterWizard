@@ -60,10 +60,6 @@ Nesta versão do EuroMillions Master Wizard pode destacar-se as melhorias funcio
 ✨ Planeado para versões seguintes:
 
 - 📤 Exportação de previsões para **PDF** ou **Excel**
-- 🔁 Simulações em lote com diferentes estratégias
-- 📈 Histórico pessoal de acertos e estatísticas evolutivas
-- 🧠 Aprendizado incremental com feedback do utilizador
-- 🌍 Interface multilíngue com suporte a EN/PT/FR
 
 ---
 
