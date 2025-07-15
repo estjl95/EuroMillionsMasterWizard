@@ -12,7 +12,7 @@ from scipy.stats import poisson
 class InterfaceApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("EuroMillions Master Wizard v1.2")
+        self.root.title("EuroMillions Master Wizard v1.3")
         self.root.geometry("540x520")
 
         self.simulador = EuroMillionsMasterWizard("dados/resultados_euromilhoes.xlsx")
@@ -31,7 +31,7 @@ class InterfaceApp:
         # Título
         self.label_titulo = ttk.Label(
             self.root,
-            text="🔢 EuroMillions Master Wizard v1.2",
+            text="🔢 EuroMillions Master Wizard v1.3",
             font=("Segoe UI", 16, "bold")
         )
         self.label_titulo.pack(pady=10)
@@ -466,9 +466,9 @@ class InterfaceApp:
                 return
 
             try:
-                numeros_previstos = [int(n.strip()) for n in num_escolhidos_txt.split(",") if n.strip().isdigit()]
-                estrelas_previstas = [int(e.strip()) for e in estrelas_escolhidas_txt.split(",") if e.strip().isdigit()]
-                if len(numeros_previstos) != 5 or len(estrelas_previstas) != 2:
+                num_escolhidos_txt = [int(n.strip()) for n in num_escolhidos_txt.split(",") if n.strip().isdigit()]
+                estrelas_escolhidas_txt = [int(e.strip()) for e in estrelas_escolhidas_txt.split(",") if e.strip().isdigit()]
+                if len(num_escolhidos_txt) != 5 or len(estrelas_escolhidas_txt) != 2:
                     self.texto_historico.insert("end",
                                                 "⚠️ Erro: introduz exatamente 5 números e 2 estrelas na previsão.\n\n")
                     return
