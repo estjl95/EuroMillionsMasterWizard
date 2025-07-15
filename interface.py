@@ -318,10 +318,15 @@ class InterfaceApp:
 
     def prever_sequencia(self):
         previsoes = {}
-        usados = set()  # Para evitar repetições de números ou estrelas
+        usados = set()
+
+        # 🔍 Preparar os pares de estrelas mais frequentes
+        df_estrelas = self.simulador.df[self.simulador.col_estrelas].dropna().astype(int)
+        pares_estrelas = [tuple(sorted(row)) for row in df_estrelas.values.tolist()]
+        from collections import Counter
+        pares_frequentes = [par for par, _ in Counter(pares_estrelas).most_common(10)]
 
         for nome, coluna in self.posicoes.items():
-            # Garante que há transições geradas
             if coluna not in self.simulador.transicoes:
                 self.simulador.gerar_cadeia_markov(coluna)
 
@@ -330,8 +335,18 @@ class InterfaceApp:
                 previsoes[nome] = "?"
                 continue
 
+            # ✨ Tratar estrelas como par frequente
+            if nome == "Estrela 1":
+                for e1, e2 in pares_frequentes:
+                    if e1 not in usados and e2 not in usados:
+                        previsoes["Estrela 1"] = e1
+                        previsoes["Estrela 2"] = e2
+                        usados.update({e1, e2})
+                        break
+                continue
+
+            # 🔢 Tratar números principais com Markov
             try:
-                # Seleciona até 3 origens com maior volume de transições
                 origens_fortes = sorted(
                     trans.items(),
                     key=lambda item: sum(item[1].values()),
@@ -351,20 +366,22 @@ class InterfaceApp:
             except ValueError:
                 previsoes[nome] = "?"
 
-        # 🔮 Renderiza o texto final
+        # 🎯 Gerar texto consolidado
         numeros = ", ".join(str(previsoes.get(f"N{i}", "?")) for i in range(1, 6))
-        estrelas = ", ".join([
-            str(previsoes.get("Estrela 1", "?")),
-            str(previsoes.get("Estrela 2", "?"))
-        ])
+        estrelas = ", ".join([str(previsoes.get("Estrela 1", "?")), str(previsoes.get("Estrela 2", "?"))])
 
         texto = (
             f"🔮 Sequência prevista:\n"
-            f"Números: {numeros}\nEstrelas: {estrelas}"
+            f"Números previstos: {numeros}\n"
+            f"Estrelas previstas: {estrelas}"
         )
-
         self.texto_historico.insert("end", texto + "\n\n")
         self.texto_historico.see("end")
+
+        # 📊 Análise da frequência
+        self.analisar_previstos(previsoes)
+
+        # Extras visuais
         self.mostrar_transicoes_percentuais()
         self.mostrar_destinos_provaveis()
         self.analisar_previstos(previsoes)
