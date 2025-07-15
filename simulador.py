@@ -36,6 +36,21 @@ class EuroMillionsMasterWizard:
             return None
         return max(trans[valor_atual], key=trans[valor_atual].get)
 
+    def prever_par_por_markov(self, coluna, valor_atual):
+        trans = self.transicoes.get(coluna, {})
+        if valor_atual not in trans:
+            return None
+
+        destinos = trans[valor_atual]
+        top_destinos = sorted(destinos.items(), key=lambda x: x[1], reverse=True)
+
+        if len(top_destinos) >= 2:
+            return top_destinos[0][0], top_destinos[1][0]
+        elif len(top_destinos) == 1:
+            return top_destinos[0][0], None
+        else:
+            return None
+
     # 🎯 Filtrar transições para manter apenas certos valores como destino
     def filtrar_transicoes_por_valor(self, coluna, valores_desejados):
         transicoes_originais = self.transicoes.get(coluna, {})
