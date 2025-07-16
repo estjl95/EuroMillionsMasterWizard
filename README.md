@@ -104,7 +104,7 @@ python main.py
 
 ### ⚠️ Aviso
 
-Este programa foi concebido para aumentar eficazmente as probabilidades de ganhar o prémio máximo do jogo, mas não garante resultados nem substitui o fator sorte.
+Este software foi concebido para aumentar eficazmente as probabilidades de ganhar o prémio máximo do jogo, mas não garante resultados lucrativos nem substitui o fator aleatório.
 
 simulador.py:
 ⚠️ Este ficheiro é parte experimental do projeto.
