@@ -4,63 +4,24 @@
 ![Licença](https://img.shields.io/badge/licença-CC--BY--NC--ND%204.0-lightgrey)
 ![Python](https://img.shields.io/badge/python-3.11+-yellow)
 
-**Versão 1.3**  
+**Versão 1.4**  
 Nesta versão do EuroMillions Master Wizard pode destacar-se as melhorias funcionais e implementação de novas funcionalidades, garantindo também robustez, manutenção e inovação.
 
 ![splash](splash.png)
 
 ---
 
-## 🚀 Novidades na v1.3:
+## 🚀 Novidades na v1.4:
 
 ### 🔧 Melhorias Funcionais
-- Adicionada lógica inteligente que permite ao utilizador escolher entre:
-  - Comparar a chave oficial com a **sequência prevista por Markov**
-  - Comparar a chave oficial com uma **sequência jogada manualmente** introduzida via interface
+- Exportação de previsões em Excel e PDF;
+- Remover duplicação na "📊 Análise da frequência histórica:", na previsão de padrão sequencial markoviana;
+- Corrigir a parte posicional da "🔮 Sequência prevista:";
+- Adição de espaçamento entre linhas, de forma a facilitar a leitura e interpretação dos resultados ao utilizador.
 
-- Sequência prevista gerada de forma consolidada:
-  - Evita duplicações e inconsistências nas estrelas
-  - Usa pares de estrelas mais frequentes com controlo de repetições
-
-- Função de comparação redesenhada:
-  - Contagem segura e precisa de números e estrelas acertadas
-  - Detecção do **quinteto completo de números** (acerto quintúplo)
-  - Detecção do **par completo de estrelas** (acerto duplo)
-  - Detecção da **chave completa** (acerto quintúplo para os números e acerto duplo para as estrelas)
-
-### 🧠 Análise Estatística
-- Implementado sistema de classificação de previsões:
-  - 🔴 Quente (acima da média histórica, acima da expectativa)
-  - 🟡 Morno (frequência média, dentro da expectativa)
-  - 🔵 Frio (abaixo da média, abaixo da expectativa)
-- Informações visuais incluídas no histórico para cada número e estrela
-
-### 🎯 Interface e Experiência
-- Caixa de diálogo (`simpledialog`) para inserção da chave oficial e sequência manual
-- Mensagens amigáveis e protegidas contra cancelamentos ou entradas incompletas
-- Função “Mostrar acertos” atualizada com escolha dinâmica e fluxo de comparação unificado
-
-### 🛡️ Robustez e Manutenção
-- Tratamento de exceções para entradas `NoneType` e valores inválidos
-- Preparação da função `verificar_versao_remota()` com timeout ajustável e tentativas múltiplas
-- Estrutura modular pronta para futuras exportações e simulações em lote
-
----
-
-## 🔄 Atualizações automáticas
-
-> O programa verifica se há uma nova versão disponível no GitHub comparando com o ficheiro `versao.txt`.  
-> Se estiveres a usar uma versão antiga, serás notificado automaticamente na interface.  
-> Certifica-te de que tens ligação à internet ativa para que esta funcionalidade funcione corretamente.
-
----
-
-## 📍 Roadmap futuro
-
-✨ Planeado para versões seguintes:
-
-- 📤 Exportação de previsões para **PDF** ou **Excel**
-- 🌓 Modo escuro (Dark Mode)
+### 📍 Novas funcionalidades:
+- Opção para sair do programa, caso o utilizador pretenda;
+- 🌓 Modo escuro (Dark Mode) e adição de outros temas à escolha do utilizador.
 
 ---
 
