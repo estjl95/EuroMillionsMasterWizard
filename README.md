@@ -60,6 +60,7 @@ Nesta versão do EuroMillions Master Wizard pode destacar-se as melhorias funcio
 ✨ Planeado para versões seguintes:
 
 - 📤 Exportação de previsões para **PDF** ou **Excel**
+- 🌓 Modo escuro (Dark Mode)
 
 ---
 
