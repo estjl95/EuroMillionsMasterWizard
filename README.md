@@ -47,8 +47,9 @@ Em desenvolvimento:
 ## 🚀 Como usar
 
 1. **Descarrega o instalador** da [última versão aqui](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
-2. Executa o ficheiro `Setup.exe`
-3. Abre o programa e começa a explorar as previsões!
+2. Executa o ficheiro `Setup.exe` (para atualização automática, caso tenhas instalado previamente o software) ou extrai a pasta `.zip` do software e executa o ficheiro `Setup.exe`, caso instales e utilizes pela primeira vez.
+
+4. Abre o programa e começa a explorar as previsões!
 
 > ⚠️ Requisitos: Windows 10 ou superior
 
