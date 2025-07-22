@@ -1,0 +1,59 @@
+[Setup]
+AppName=EuroMillions Master Wizard
+AppVersion=1.4
+AppId={{EuroMillionsMasterWizard}}
+AppPublisher=José Estácio
+AppComments=Programa concebido para prever números prováveis com base em estatísticas reais do EuroMilhões, utilizando métodos matemáticos para aumentar eficazmente as probabilidades de ganhar o jackpot.
+AppCopyright=© 2025 José Estácio
+DefaultDirName={pf}\EuroMillionsMasterWizard v1.4
+DefaultGroupName=EuroMillions Master Wizard v1.4
+OutputDir={Output}\EuroMillions Master Wizard v1.4
+Uninstallable=yes
+DisableDirPage=no
+DisableProgramGroupPage=no
+AllowNoIcons=no
+PrivilegesRequired=admin
+SetupIconFile=assets\icone.ico
+UninstallDisplayIcon={app}\EuroMillionsMasterWizard.exe
+UninstallDisplayName=EuroMillions Master Wizard v1.4
+WizardStyle=modern
+OutputBaseFilename=Setup
+AlwaysShowComponentsList=false
+LicenseFile=LICENSE.txt
+
+[Files]
+Source: "dist\EuroMillionsMasterWizard.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "assets\icone.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "assets\splash.png"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "dados\resultados_euromilhoes.xlsx"; DestDir: "{app}\dados"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "preferencias.json"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "dist\msgbox\msgbox.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+
+[Icons]
+Name: "{group}\EuroMillions Master Wizard"; Filename: "{app}\EuroMillionsMasterWizard.exe"; IconFilename: "{app}\icone.ico"
+Name: "{userdesktop}\EuroMillions Master Wizard"; Filename: "{app}\EuroMillionsMasterWizard.exe"; IconFilename: "{app}\icone.ico"; Tasks: desktopicon
+
+[Tasks]
+Name: "desktopicon"; Description: "Criar atalho no ambiente de trabalho"; GroupDescription: "Opções adicionais:"; Flags: unchecked
+
+[Run]
+Filename: "{app}\EuroMillionsMasterWizard.exe"; Description: "Executar após instalação"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}\dados"
+
+[UninstallRun]
+Filename: "{app}\msgbox.exe"; Flags: runhidden
+
+[Code]
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  // Oculta páginas se for instalação silenciosa
+  if WizardSilent then
+  begin
+    if PageID = wpWelcome then Result := True;
+    if PageID = wpSelectDir then Result := True;
+    if PageID = wpSelectProgramGroup then Result := True;
+    if PageID = wpFinished then Result := True;
+  end;
+end;
