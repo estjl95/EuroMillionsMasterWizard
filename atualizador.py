@@ -5,7 +5,7 @@ import os
 import sys
 import subprocess
 
-VERSAO_LOCAL = "1.3"
+VERSAO_LOCAL = "1.4"
 URL_VERSAO = "https://raw.githubusercontent.com/estjl95/EuroMillionsMasterWizard/main/versao.txt"
 FICHEIRO_IGNORE = os.path.join(os.path.expanduser("~"), ".wizard_ignorar_versao.txt")
 
@@ -52,26 +52,14 @@ def verificar_atualizacao():
                     pasta_temp = os.path.join(os.path.dirname(sys.executable), "atualizacao_temp")
                     os.makedirs(pasta_temp, exist_ok=True)
 
-                    novo_exe = os.path.join(pasta_temp, "novo.exe")
+                    setup_path = os.path.join(pasta_temp, "Setup.exe")
                     with requests.get(link_download, stream=True) as r:
                         r.raise_for_status()
-                        with open(novo_exe, 'wb') as ficheiro_exe:
+                        with open(setup_path, 'wb') as ficheiro_exe:
                             for chunk in r.iter_content(8192):
-                                if chunk:
-                                    ficheiro_exe.write(chunk)
+                                ficheiro_exe.write(chunk)
 
-                    bat_path = os.path.join(pasta_temp, "atualizar.bat")
-                    atual_path = sys.executable.replace('"', '')
-                    with open(bat_path, 'w') as ficheiro_bat:
-                        ficheiro_bat.write(f"""@echo off
-timeout /t 2 >nul
-del "{atual_path}" >nul
-move "{novo_exe}" "{atual_path}"
-start "" "{atual_path}"
-rmdir /s /q "{pasta_temp}"
-""")
-
-                    subprocess.Popen(['cmd', '/c', bat_path])
+                    subprocess.Popen([setup_path, "/SILENT"])
                     sys.exit()
                 except Exception as erro:
                     messagebox.showerror("Erro", f"Erro ao atualizar: {erro}")
