@@ -15,8 +15,8 @@ Nesta versão do EuroMillions Master Wizard pode destacar-se as melhorias funcio
 
 ### 🔧 Melhorias Funcionais
 - Exportação de previsões em Excel e PDF;
-- Remover duplicação na "📊 Análise da frequência histórica:", na previsão de padrão sequencial markoviana;
-- Corrigir a parte posicional da "🔮 Sequência prevista:";
+- Remoção de duplicação na "📊 Análise da frequência histórica:", na previsão de padrão sequencial markoviana;
+- Correção de posições da "🔮 Sequência prevista:";
 - Adição de espaçamento entre linhas, de forma a facilitar a leitura e interpretação dos resultados ao utilizador.
 
 ### 📍 Novas funcionalidades:
