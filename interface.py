@@ -4,15 +4,23 @@ import tkinter as tk
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import datetime
+import sys
 from atualizador import verificar_atualizacao
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from simulador import EuroMillionsMasterWizard
 from scipy.stats import poisson
+from collections import Counter
+from fpdf import FPDF
 
 class InterfaceApp:
-    def __init__(self, root):
+    def __init__(self, root, style):
         self.root = root
-        self.root.title("EuroMillions Master Wizard v1.3")
+        self.style = style  # 👉 guardar referência ao style
+
+        self.modo_escuro_ativo = True
+
+        self.root.title("EuroMillions Master Wizard v1.4")
         self.root.geometry("540x520")
 
         self.simulador = EuroMillionsMasterWizard("dados/resultados_euromilhoes.xlsx")
@@ -31,7 +39,7 @@ class InterfaceApp:
         # Título
         self.label_titulo = ttk.Label(
             self.root,
-            text="🔢 EuroMillions Master Wizard v1.3",
+            text="🔢 EuroMillions Master Wizard v1.4",
             font=("Segoe UI", 16, "bold")
         )
         self.label_titulo.pack(pady=10)
@@ -48,11 +56,13 @@ class InterfaceApp:
         self.tab_acertos = ttk.Frame(self.tabs)
         self.tab_estatisticas = ttk.Frame(self.tabs)
         self.tab_utilitarios = ttk.Frame(self.tabs)
+        self.tab_sair = ttk.Frame(self.tabs)
 
         self.tabs.add(self.tab_previsoes, text="🔮 Previsões")
         self.tabs.add(self.tab_acertos, text="✅ Acertos")
         self.tabs.add(self.tab_estatisticas, text="📊 Estatísticas")
         self.tabs.add(self.tab_utilitarios, text="📁 Utilitários")
+        self.tabs.add(self.tab_sair, text="🚪 Sair")
 
         self.combo_estatistica = ttk.Combobox(self.tab_estatisticas, values=list(self.posicoes.keys()),
                                               state="readonly")
@@ -65,12 +75,24 @@ class InterfaceApp:
         self.botao_poisson_estrelas = ttk.Button(self.tab_estatisticas) # ✅ botão para ativar Poisson
         self.combo_estatistica = ttk.Combobox(self.tab_estatisticas, values=list(self.posicoes.keys()),
                                               state="readonly")
+
         # Canvas para mostrar gráfico
         self.canvas_poisson = tk.Canvas(self.tab_estatisticas, width=720, height=440)  # ✅ canvas puro
+
         # Importar/exportar
         self.botao_importar = ttk.Button(self.tab_utilitarios)
         self.botao_exportar = ttk.Button(self.tab_utilitarios)
         self.botao_atualizar = ttk.Button(self.tab_utilitarios)
+        self.botao_tema = ttk.Button(self.tab_utilitarios)
+
+        # Sair do programa
+        self.botao_sair = ttk.Button(self.tab_sair)
+
+        temas = ["darkly", "litera", "solar", "cyborg", "superhero"]
+        self.combo_tema = ttk.Combobox(self.tab_utilitarios, values=temas, state="readonly")
+        self.combo_tema.set("darkly")
+        self.combo_tema.pack(pady=5)
+        self.combo_tema.bind("<<ComboboxSelected>>", lambda e: self.style.theme_use(self.combo_tema.get()))
 
         # Resultado visual abaixo dos separadores
         self.resultado = tk.Label(self.root, text="", font=("Segoe UI Emoji", 11))
@@ -87,6 +109,21 @@ class InterfaceApp:
 
         self.texto_historico = tk.Text(self.frame_historico, height=8, wrap="word", yscrollcommand=self.scrollbar.set)
         self.texto_historico.pack(side="left", fill="both", expand=True)
+
+    def alternar_modo(self):
+        if self.style.theme.name == "darkly":
+            self.style.theme_use("litera")
+            self.modo_escuro_ativo = False
+            self.botao_tema.config(text="🌞 Modo Claro")
+        else:
+            self.style.theme_use("darkly")
+            self.modo_escuro_ativo = True
+            self.botao_tema.config(text="🌙 Modo Escuro")
+
+    def fechar_programa(self):
+        if messagebox.askokcancel("Confirmar saída", "Tens a certeza que pretendes sair?"):
+            self.root.quit()
+            sys.exit()
 
     def criar_widgets(self):
         # 🔮 Previsão sequencial completa
@@ -159,7 +196,7 @@ class InterfaceApp:
 
         ttk.Label(
             self.tab_utilitarios,
-            text="Opções adicionais:",
+            text="Temas e outras opções:",
             font=("Segoe UI", 10, "bold")
         ).pack(pady=10)
 
@@ -169,18 +206,27 @@ class InterfaceApp:
         self.botao_exportar.config(text="💾 Exportar previsões",command=self.exportar_previsoes)
         self.botao_exportar.pack(pady=5)
 
-        ttk.Label(
-            self.tab_utilitarios,
-            text="Atualizar para a versão mais recente:",
-            font=("Segoe UI", 10, "bold")
-        ).pack(pady=(15, 5))
-
         self.botao_atualizar = ttk.Button(
             self.tab_utilitarios,
             text="🔄 Verificar atualizações",
             command=verificar_atualizacao
         )
         self.botao_atualizar.pack(pady=5)
+
+        self.botao_tema = ttk.Button(
+            self.tab_utilitarios,
+            text="🌗 Alternar Modo",
+            command=self.alternar_modo
+        )
+        self.botao_tema.pack(pady=5)
+
+        # 🚪 Sair
+        self.botao_sair = ttk.Button(
+            self.tab_sair,
+            text="🚪 Sair do programa",
+            command=self.fechar_programa
+        )
+        self.botao_sair.pack(pady=10)
 
     def mostrar_estatisticas(self):
         posicao_nome = self.combo_estatistica.get()
@@ -193,10 +239,10 @@ class InterfaceApp:
         try:
             stats = self.simulador.estatisticas_por_coluna(coluna)
             texto = f"📊 Estatísticas para {posicao_nome}:\n"
-            texto += f"Média: {stats['media']}\n"
-            texto += "Top 10 mais frequentes:\n"
+            texto += f"\nMédia: {stats['media']}\n"
+            texto += "\nTop 10 mais frequentes:\n"
             for num, freq in stats["top_10"].items():
-                texto += f"  {num}: {freq}x\n"
+                texto += f"\n  {num}: {freq}x\n"
 
             self.texto_historico.insert("end", texto + "\n\n")
             self.texto_historico.see("end")
@@ -257,7 +303,7 @@ class InterfaceApp:
 
             # Mostrar resumo textual no histórico
             texto_resumo = f"📈 Média esperada por número: {lambda_val:.2f}\n"
-            texto_resumo += f"🔍 Número mais frequente: {valores[np.argmax(observadas)]} ({max(observadas)}x)\n"
+            texto_resumo += f"\n🔍 Número mais frequente: {valores[np.argmax(observadas)]} ({max(observadas)}x)\n"
             self.texto_historico.insert("end", texto_resumo + "\n")
             self.texto_historico.see("end")
 
@@ -309,7 +355,7 @@ class InterfaceApp:
 
             # Texto informativo no histórico
             texto = f"🌟 Média esperada por estrela: {lambda_val:.2f}\n"
-            texto += f"✨ Estrela mais frequente: {valores[max_index]} ({max(observadas)}x)\n"
+            texto += f"\n✨ Estrela mais frequente: {valores[max_index]} ({max(observadas)}x)\n"
             self.texto_historico.insert("end", texto + "\n")
             self.texto_historico.see("end")
 
@@ -323,7 +369,6 @@ class InterfaceApp:
         # 🔍 Preparar os pares de estrelas mais frequentes
         df_estrelas = self.simulador.df[self.simulador.col_estrelas].dropna().astype(int)
         pares_estrelas = [tuple(sorted(row)) for row in df_estrelas.values.tolist()]
-        from collections import Counter
         pares_frequentes = [par for par, _ in Counter(pares_estrelas).most_common(10)]
 
         for nome, coluna in self.posicoes.items():
@@ -367,13 +412,16 @@ class InterfaceApp:
                 previsoes[nome] = "?"
 
         # 🎯 Gerar texto consolidado
-        numeros = ", ".join(str(previsoes.get(f"N{i}", "?")) for i in range(1, 6))
-        estrelas = ", ".join([str(previsoes.get("Estrela 1", "?")), str(previsoes.get("Estrela 2", "?"))])
+        numeros_lista = [previsoes.get(f"N{i}", "?") for i in range(1, 6)]
+        numeros_filtrados = sorted([n for n in numeros_lista if isinstance(n, int)])
+
+        estrelas_lista = [previsoes.get("Estrela 1", "?"), previsoes.get("Estrela 2", "?")]
+        estrelas_filtradas = sorted([e for e in estrelas_lista if isinstance(e, int)])
 
         texto = (
-            f"🔮 Sequência prevista:\n"
-            f"Números previstos: {numeros}\n"
-            f"Estrelas previstas: {estrelas}"
+            "🔮 Sequência prevista:\n\n"
+            f"Números previstos: {', '.join(map(str, numeros_filtrados))}\n\n"
+            f"Estrelas previstas: {', '.join(map(str, estrelas_filtradas))}"
         )
         self.texto_historico.insert("end", texto + "\n\n")
         self.texto_historico.see("end")
@@ -384,7 +432,6 @@ class InterfaceApp:
         # Extras visuais
         self.mostrar_transicoes_percentuais()
         self.mostrar_destinos_provaveis()
-        self.analisar_previstos(previsoes)
 
     def mostrar_transicoes_percentuais(self):
         self.texto_historico.insert("end", "📊 Transições percentuais por posição:\n")
@@ -394,9 +441,9 @@ class InterfaceApp:
                 continue
 
             self.texto_historico.insert("end", "-" * 40 + "\n")
-            self.texto_historico.insert("end", f"🔸 {nome}:\n")
+            self.texto_historico.insert("end", f"\n🔸 {nome}:\n")
             for origem, destinos in percentuais.items():
-                linha = f"  {origem} → " + ", ".join(
+                linha = f"\n  {origem} → " + ", ".join(
                     f"{destino} ({prob}%)" for destino, prob in destinos.items()
                 )
                 self.texto_historico.insert("end", linha + "\n")
@@ -411,7 +458,7 @@ class InterfaceApp:
             for origem in transicoes:
                 destinos = transicoes[origem]
                 mais_fortes = sorted(destinos.items(), key=lambda x: x[1], reverse=True)[:5]
-                linha = f"🔸 {nome} ({origem}) → " + ", ".join(f"{d} ({p}%)" for d, p in mais_fortes)
+                linha = f"\n🔸 {nome} ({origem}) → " + ", ".join(f"{d} ({p}%)" for d, p in mais_fortes)
                 self.texto_historico.insert("end", linha + "\n")
         self.texto_historico.insert("end", "\n")
         self.texto_historico.see("end")
@@ -419,16 +466,27 @@ class InterfaceApp:
     def analisar_previstos(self, previsoes):
         self.texto_historico.insert("end", "📊 Análise da frequência histórica:\n", "titulo")
 
-        for nome, coluna in self.posicoes.items():
-            if nome not in previsoes or previsoes[nome] == "?":
-                continue
+        # Posições principais (números e estrelas)
+        pos_numerica = [f"N{i}" for i in range(1, 6)]
+        pos_estrelas = ["Estrela 1", "Estrela 2"]
 
-            valor = previsoes[nome]
+        # ➕ Obter apenas os valores válidos (inteiros)
+        nums_ordenados = sorted(
+            [(nome, previsoes.get(nome)) for nome in pos_numerica if isinstance(previsoes.get(nome), int)],
+            key=lambda par: par[1]
+        )
+        estrelas_ordenadas = sorted(
+            [(nome, previsoes.get(nome)) for nome in pos_estrelas if isinstance(previsoes.get(nome), int)],
+            key=lambda par: par[1]
+        )
+
+        for nome, valor in nums_ordenados + estrelas_ordenadas:
+            coluna = self.posicoes[nome]
             stats = self.simulador.estatisticas_por_coluna(coluna)
             freq = stats["frequencias"].get(valor, 0)
             media = stats["media"]
 
-            # 🧮 Classificação
+            # 🔥 Classificação visual
             if freq >= media + 2:
                 classe = "🔴 Quente"
             elif freq <= media - 2:
@@ -436,10 +494,17 @@ class InterfaceApp:
             else:
                 classe = "🟡 Morno"
 
-            self.texto_historico.insert("end", f"🔸 {nome}: {valor} → {freq} ocorrências ({classe})\n")
+            self.texto_historico.insert(
+                "end", f"\n🔸 {nome}: {valor} → {freq} ocorrências ({classe})\n"
+            )
 
         self.texto_historico.insert("end", "\n")
         self.texto_historico.see("end")
+
+        # ✅ Guardar previsão no histórico interno
+        self.historico_previsoes.append({
+            nome: previsoes.get(nome, "?") for nome in pos_numerica + pos_estrelas
+        })
 
     @staticmethod
     def obter_chave_oficial():
@@ -548,28 +613,28 @@ class InterfaceApp:
             # 🖼️ Inserir no histórico
             self.texto_historico.insert("end", f"🧮 Comparação com chave oficial ({data_txt}):\n", "titulo")
             self.texto_historico.insert("end",
-                                        f"🔮 Chave registada manualmente: {', '.join(map(str, num_escolhidos_txt))} + {', '.join(map(str, estrelas_escolhidas_txt))}\n")
+                                        f"\n🔮 Chave registada manualmente: {', '.join(map(str, num_escolhidos_txt))} + {', '.join(map(str, estrelas_escolhidas_txt))}\n")
             self.texto_historico.insert("end",
-                                        f"🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n")
-            self.texto_historico.insert("end", f"✅ Acertos: {total_n} números, {total_e} estrelas\n")
+                                        f"\n🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n")
+            self.texto_historico.insert("end", f"\n✅ Acertos: {total_n} números, {total_e} estrelas\n")
 
             if all(n in numeros_oficiais for n in num_escolhidos_txt):
-                self.texto_historico.insert("end", "🎯 Quinteto completo de números acertado!\n", "numeros_certos")
+                self.texto_historico.insert("end", "\n🎯 Quinteto completo de números acertado!\n", "numeros_certos")
 
             if all(e in estrelas_oficiais for e in estrelas_escolhidas_txt):
-                self.texto_historico.insert("end", "🌟 Par completo de estrelas acertado!\n", "par_estrela_certo")
+                self.texto_historico.insert("end", "\n🌟 Par completo de estrelas acertado!\n", "par_estrela_certo")
 
             if all(n in numeros_oficiais for n in num_escolhidos_txt) & all(
                     e in estrelas_oficiais for e in estrelas_escolhidas_txt):
-                self.texto_historico.insert("end", "✅ Parabéns! Ganhaste o jackpot do EuroMillions!\n",
+                self.texto_historico.insert("end", "\n✅ Parabéns! Ganhaste o jackpot do EuroMillions!\n",
                                             "numeros_certos, par_estrela_certo")
 
             self.texto_historico.insert("end", "\n")
             self.texto_historico.see("end")
 
             texto_resultado = (
-                f"🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n"
-                f"✅ Acertos: {total_n} números, {total_e} estrelas"
+                f"\n🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n"
+                f"\n✅ Acertos: {total_n} números, {total_e} estrelas"
             )
             self.resultado.config(text=texto_resultado)
 
@@ -590,15 +655,49 @@ class InterfaceApp:
             messagebox.showinfo("Info", "Ainda não há previsões para exportar.")
             return
 
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        nome_sugestao = f"previsoes_v1.4_{timestamp}.xlsx"
+
         caminho = filedialog.asksaveasfilename(
+            initialfile=nome_sugestao,
             defaultextension=".xlsx",
-            filetypes=[("Ficheiros Excel", "*.xlsx")],
+            filetypes=[("Ficheiros Excel", "*.xlsx"), ("Ficheiros PDF", "*.pdf")],
             title="Guardar previsões como..."
         )
+
         if caminho:
             try:
-                df = pd.DataFrame({"Previsões": self.historico_previsoes})
+                # Exportar Excel
+                df = pd.DataFrame({
+                    "Previsão": self.historico_previsoes,
+                    "Versão": "v1.4",
+                    "Data": datetime.datetime.now().strftime("%d-%m-%Y")
+                })
                 df.to_excel(caminho, index=False)
-                messagebox.showinfo("Sucesso", "Previsões exportadas com sucesso!")
+
+                def exportar_para_pdf(previsoes, caminho_pdf_1):
+                    pdf = FPDF()
+                    pdf.add_page()
+                    pdf.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
+                    pdf.set_font("DejaVu", size=12)
+
+                    for idx, previsao in enumerate(previsoes, 1):
+                        if isinstance(previsao, dict):
+                            linha = (
+                                f"{idx}: Números → {previsao['N1']}, {previsao['N2']}, {previsao['N3']}, "
+                                f"{previsao['N4']}, {previsao['N5']} | Estrelas → {previsao['Estrela 1']}, {previsao['Estrela 2']}"
+                            )
+                        else:
+                            linha = f"{idx}: {previsao}"
+                        pdf.cell(200, 10, linha, ln=1, align="L")
+
+                    pdf.output(caminho_pdf_1)
+
+                # Gerar caminho para PDF
+                caminho_pdf = caminho.replace(".xlsx", ".pdf")
+                # Exportar PDF
+                exportar_para_pdf(self.historico_previsoes, caminho_pdf)
+
+                messagebox.showinfo("Sucesso", "Previsões exportadas com sucesso em Excel e PDF!")
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao exportar:\n{e}")
