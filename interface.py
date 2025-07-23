@@ -413,10 +413,10 @@ class InterfaceApp:
 
         # 🎯 Gerar texto consolidado
         numeros_lista = [previsoes.get(f"N{i}", "?") for i in range(1, 6)]
-        numeros_filtrados = sorted([n for n in numeros_lista if isinstance(n, int)])
+        numeros_filtrados = [n for n in numeros_lista if isinstance(n, int)]
 
         estrelas_lista = [previsoes.get("Estrela 1", "?"), previsoes.get("Estrela 2", "?")]
-        estrelas_filtradas = sorted([e for e in estrelas_lista if isinstance(e, int)])
+        estrelas_filtradas = [e for e in estrelas_lista if isinstance(e, int)]
 
         texto = (
             "🔮 Sequência prevista:\n\n"
@@ -471,14 +471,16 @@ class InterfaceApp:
         pos_estrelas = ["Estrela 1", "Estrela 2"]
 
         # ➕ Obter apenas os valores válidos (inteiros)
-        nums_ordenados = sorted(
-            [(nome, previsoes.get(nome)) for nome in pos_numerica if isinstance(previsoes.get(nome), int)],
-            key=lambda par: par[1]
-        )
-        estrelas_ordenadas = sorted(
-            [(nome, previsoes.get(nome)) for nome in pos_estrelas if isinstance(previsoes.get(nome), int)],
-            key=lambda par: par[1]
-        )
+        nums_ordenados = [
+            (nome, previsoes.get(nome))
+            for nome in pos_numerica
+            if isinstance(previsoes.get(nome), int)
+        ]
+        estrelas_ordenadas = [
+            (nome, previsoes.get(nome))
+            for nome in pos_estrelas
+            if isinstance(previsoes.get(nome), int)
+        ]
 
         for nome, valor in nums_ordenados + estrelas_ordenadas:
             coluna = self.posicoes[nome]
@@ -678,7 +680,7 @@ class InterfaceApp:
                 def exportar_para_pdf(previsoes, caminho_pdf_1):
                     pdf = FPDF()
                     pdf.add_page()
-                    pdf.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
+                    pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
                     pdf.set_font("DejaVu", size=12)
 
                     for idx, previsao in enumerate(previsoes, 1):
@@ -699,5 +701,6 @@ class InterfaceApp:
                 exportar_para_pdf(self.historico_previsoes, caminho_pdf)
 
                 messagebox.showinfo("Sucesso", "Previsões exportadas com sucesso em Excel e PDF!")
+
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao exportar:\n{e}")
