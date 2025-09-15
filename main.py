@@ -1,3 +1,4 @@
+import requests
 import os
 import sys
 import tkinter as tk
@@ -7,9 +8,11 @@ from atualizador import verificar_atualizacao
 from interface import InterfaceApp
 from tema import style  # 👉 style já definido no tema.py
 
+
 def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
     return os.path.join(base_path, relative_path)
+
 
 def aplicar_fonte_personalizada():
     try:
@@ -19,6 +22,23 @@ def aplicar_fonte_personalizada():
             font.nametofont("TkDefaultFont").configure(family="DejaVuSans")
     except Exception as e:
         print(f"⚠️ Falha ao aplicar fonte personalizada: {e}")
+
+
+def atualizar_historico():
+    link_google_drive = "https://drive.google.com/uc?export=download&id=1fVvlpxDhtOVJvdjllDCRhiqNCgaTqFCS"
+    destino = os.path.join(os.path.expanduser("~"), "EuroMillions", "resultados_euromilhoes.xlsx")
+
+    os.makedirs(os.path.dirname(destino), exist_ok=True)
+
+    try:
+        resposta = requests.get(link_google_drive, timeout=30)
+        resposta.raise_for_status()
+        with open(destino, "wb") as f:
+            f.write(resposta.content)
+        print("✅ Histórico atualizado com sucesso.")
+    except Exception as e:
+        print(f"❌ Erro ao atualizar histórico: {e}")
+
 
 def mostrar_splash(callback):
     splash = tk.Toplevel()
@@ -35,9 +55,11 @@ def mostrar_splash(callback):
 
     splash.after(5000, lambda *_args: [splash.destroy(), callback()]) # type: ignore
 
+
 def iniciar_app():
     InterfaceApp(root, style)
     verificar_atualizacao()
+
 
 # 🖥️ Estilo global e root inicial
 root = style.master
