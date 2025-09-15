@@ -34,9 +34,9 @@ Tens uma sugestão ou encontraste um bug?
 
 ---
 
-## 🌐 Versão internacional
+## 🌐 International version
 
-Em desenvolvimento:
+Development in progress:
 
 > An English version of this `README.md` will soon be available under `README_en.md`, featuring full instructions and international formatting.
 
