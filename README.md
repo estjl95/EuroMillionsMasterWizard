@@ -30,7 +30,7 @@ Tens uma sugestão ou encontraste um bug?
 - 📩 Envia mensagem para: `estjl95@outlook.com`
 - 🐞 Abre uma issue [aqui no GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
 
-> Estamos sempre disponíveis para melhorar o Wizard contigo!
+> Estamos sempre disponíveis para melhorar o EuroMillionsMasterWizard contigo!
 
 ---
 
