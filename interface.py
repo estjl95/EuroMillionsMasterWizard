@@ -6,12 +6,18 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import datetime
 import sys
+import requests
+import os
+import unicodedata
+import traceback
 from atualizador import verificar_atualizacao
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from simulador import EuroMillionsMasterWizard
 from scipy.stats import poisson
 from collections import Counter
 from fpdf import FPDF
+from datetime import datetime
+
 
 class InterfaceApp:
     def __init__(self, root, style):
@@ -20,7 +26,7 @@ class InterfaceApp:
 
         self.modo_escuro_ativo = True
 
-        self.root.title("EuroMillions Master Wizard v1.4")
+        self.root.title("EuroMillions Master Wizard v1.5")
         self.root.geometry("540x520")
 
         self.simulador = EuroMillionsMasterWizard("dados/resultados_euromilhoes.xlsx")
@@ -39,7 +45,7 @@ class InterfaceApp:
         # Título
         self.label_titulo = ttk.Label(
             self.root,
-            text="🔢 EuroMillions Master Wizard v1.4",
+            text="🔢 EuroMillions Master Wizard v1.5",
             font=("Segoe UI", 16, "bold")
         )
         self.label_titulo.pack(pady=10)
@@ -81,6 +87,7 @@ class InterfaceApp:
 
         # Importar/exportar
         self.botao_importar = ttk.Button(self.tab_utilitarios)
+        self.botao_estado = ttk.Button(self.tab_utilitarios)
         self.botao_exportar = ttk.Button(self.tab_utilitarios)
         self.botao_atualizar = ttk.Button(self.tab_utilitarios)
         self.botao_tema = ttk.Button(self.tab_utilitarios)
@@ -144,12 +151,12 @@ class InterfaceApp:
 
         ttk.Label(
             self.tab_acertos,
-            text="Comparar previsão com chave oficial:",
+            text="Comparar a chave jogada com a chave sorteada:",
             font=("Segoe UI", 10, "bold")
         ).pack(pady=10)
 
         self.botao_comparar.config(
-            text="🧮 Mostrar acertos",
+            text="🧮 Verificar acertos",
             command=self.comparar_com_chave_oficial
         )
         self.botao_comparar.pack(pady=5)
@@ -193,29 +200,34 @@ class InterfaceApp:
         self.canvas_poisson.pack(pady=(10, 15))
 
         # 📁 Utilitários
-
         ttk.Label(
             self.tab_utilitarios,
             text="Temas e outras opções:",
             font=("Segoe UI", 10, "bold")
         ).pack(pady=10)
 
-        self.botao_importar.config(text="📁 Importar ficheiro Excel",command=self.importar_ficheiro)
+        self.botao_importar.config(
+            text="📁 Atualizar histórico de sorteios EuroMillions",
+            command=self.atualizar_resultados
+        )
         self.botao_importar.pack(pady=10)
 
-        self.botao_exportar.config(text="💾 Exportar previsões",command=self.exportar_previsoes)
+        self.botao_exportar.config(text="💾 Exportar previsões obtidas",command=self.exportar_previsoes)
         self.botao_exportar.pack(pady=5)
 
-        self.botao_atualizar = ttk.Button(
+        self.botao_estado = ttk.Button(
             self.tab_utilitarios,
-            text="🔄 Verificar atualizações",
-            command=verificar_atualizacao
+            text="ℹ️ Ver estado do histórico",
+            command=self.mostrar_estado
         )
+        self.botao_estado.pack(pady=5)
+
+        self.botao_atualizar = tk.Button(text="🔍 Verificar atualizações", command=lambda: verificar_atualizacao())
         self.botao_atualizar.pack(pady=5)
 
         self.botao_tema = ttk.Button(
             self.tab_utilitarios,
-            text="🌗 Alternar Modo",
+            text="🌗 Alternar tema",
             command=self.alternar_modo
         )
         self.botao_tema.pack(pady=5)
@@ -288,7 +300,10 @@ class InterfaceApp:
 
             # 👉 Rótulo numérico em cada barra
             for i, v in enumerate(observadas):
-                ax.text(valores[i], v + 0.5, str(v), ha="center", fontsize=8)
+                x = float(valores[i])
+                y = v + max(
+                    observadas) * 0.02  # desloca proporcionalmente
+                ax.text(x=x, y=y, s=str(v), ha="center", fontsize=8)
 
             # Curva esperada de Poisson
             ax.plot(valores, esperada, "r--", linewidth=2, label="Poisson Esperada")
@@ -340,7 +355,10 @@ class InterfaceApp:
             ax.bar(valores, observadas, color=colors, label="Frequência Observada")
 
             for i, v in enumerate(observadas):
-                ax.text(valores[i], v + 0.5, str(v), ha="center", fontsize=8)
+                x: float = float(valores[i])
+                y: float = float(v) + 0.5   # type: ignore
+                s: str = str(v)
+                ax.text(x, y, s, ha="center", fontsize=8)
 
             ax.plot(valores, esperada, "r--", linewidth=2, label="Poisson Esperada")
 
@@ -411,47 +429,13 @@ class InterfaceApp:
             except ValueError:
                 previsoes[nome] = "?"
 
-        # 🎯 Gerar texto consolidado
-        numeros_lista = [previsoes.get(f"N{i}", "?") for i in range(1, 6)]
-        numeros_filtrados = [n for n in numeros_lista if isinstance(n, int)]
-
-        estrelas_lista = [previsoes.get("Estrela 1", "?"), previsoes.get("Estrela 2", "?")]
-        estrelas_filtradas = [e for e in estrelas_lista if isinstance(e, int)]
-
-        texto = (
-            "🔮 Sequência prevista:\n\n"
-            f"Números previstos: {', '.join(map(str, numeros_filtrados))}\n\n"
-            f"Estrelas previstas: {', '.join(map(str, estrelas_filtradas))}"
-        )
-        self.texto_historico.insert("end", texto + "\n\n")
-        self.texto_historico.see("end")
-
-        # 📊 Análise da frequência
-        self.analisar_previstos(previsoes)
-
         # Extras visuais
-        self.mostrar_transicoes_percentuais()
         self.mostrar_destinos_provaveis()
 
-    def mostrar_transicoes_percentuais(self):
-        self.texto_historico.insert("end", "📊 Transições percentuais por posição:\n")
-        for nome, coluna in self.posicoes.items():
-            percentuais = self.simulador.transicoes_percentuais.get(coluna, {})
-            if not percentuais:
-                continue
-
-            self.texto_historico.insert("end", "-" * 40 + "\n")
-            self.texto_historico.insert("end", f"\n🔸 {nome}:\n")
-            for origem, destinos in percentuais.items():
-                linha = f"\n  {origem} → " + ", ".join(
-                    f"{destino} ({prob}%)" for destino, prob in destinos.items()
-                )
-                self.texto_historico.insert("end", linha + "\n")
-        self.texto_historico.insert("end", "\n")
-        self.texto_historico.see("end")
-
     def mostrar_destinos_provaveis(self):
-        self.texto_historico.insert("end", "🔍 Destinos prováveis para cada origem:\n")
+        self.texto_historico.insert("end", "🔍 Destinos prováveis para cada posição, no jogo "
+                                           "(dados atualizados):\n")
+
         for nome, coluna in self.posicoes.items():
             transicoes = self.simulador.transicoes_percentuais.get(coluna, {})
             # A origem pode ser o valor que saiu na chave anterior ou o usado no 'loop'
@@ -460,53 +444,9 @@ class InterfaceApp:
                 mais_fortes = sorted(destinos.items(), key=lambda x: x[1], reverse=True)[:5]
                 linha = f"\n🔸 {nome} ({origem}) → " + ", ".join(f"{d} ({p}%)" for d, p in mais_fortes)
                 self.texto_historico.insert("end", linha + "\n")
-        self.texto_historico.insert("end", "\n")
-        self.texto_historico.see("end")
-
-    def analisar_previstos(self, previsoes):
-        self.texto_historico.insert("end", "📊 Análise da frequência histórica:\n", "titulo")
-
-        # Posições principais (números e estrelas)
-        pos_numerica = [f"N{i}" for i in range(1, 6)]
-        pos_estrelas = ["Estrela 1", "Estrela 2"]
-
-        # ➕ Obter apenas os valores válidos (inteiros)
-        nums_ordenados = [
-            (nome, previsoes.get(nome))
-            for nome in pos_numerica
-            if isinstance(previsoes.get(nome), int)
-        ]
-        estrelas_ordenadas = [
-            (nome, previsoes.get(nome))
-            for nome in pos_estrelas
-            if isinstance(previsoes.get(nome), int)
-        ]
-
-        for nome, valor in nums_ordenados + estrelas_ordenadas:
-            coluna = self.posicoes[nome]
-            stats = self.simulador.estatisticas_por_coluna(coluna)
-            freq = stats["frequencias"].get(valor, 0)
-            media = stats["media"]
-
-            # 🔥 Classificação visual
-            if freq >= media + 2:
-                classe = "🔴 Quente"
-            elif freq <= media - 2:
-                classe = "🔵 Frio"
-            else:
-                classe = "🟡 Morno"
-
-            self.texto_historico.insert(
-                "end", f"\n🔸 {nome}: {valor} → {freq} ocorrências ({classe})\n"
-            )
 
         self.texto_historico.insert("end", "\n")
         self.texto_historico.see("end")
-
-        # ✅ Guardar previsão no histórico interno
-        self.historico_previsoes.append({
-            nome: previsoes.get(nome, "?") for nome in pos_numerica + pos_estrelas
-        })
 
     @staticmethod
     def obter_chave_oficial():
@@ -537,8 +477,8 @@ class InterfaceApp:
             # Obter o sorteio mais recente
             ultimo = df_sorteios.sort_values(col_date, ascending=False).iloc[0]
 
-            numeros = [int(ultimo[col]) for col in col_numeros]
-            estrelas = [int(ultimo[col]) for col in col_estrelas]
+            numeros = [int(ultimo[col].item()) for col in col_numeros]
+            estrelas = [int(ultimo[col].item()) for col in col_estrelas]
             data_txt = ultimo[col_date].strftime("%d/%m/%Y")
 
             return numeros, estrelas, data_txt
@@ -561,7 +501,10 @@ class InterfaceApp:
         self.texto_historico.see("end")
 
     def comparar_com_chave_oficial(self):
-        escolha = messagebox.askquestion( "Comparar com chave oficial", "Queres comparar com a sequência prevista pelo sistema (Markov)?\nSe responderes 'Não', poderás introduzir manualmente a sequência que jogaste.",
+        escolha = messagebox.askquestion( "Comparar com a chave sorteada", "Queres comparar com a sequência "
+                                                                           "prevista pelo sistema (Markov)?\n"
+                                                                           "Se responderes 'Não', poderás introduzir "
+                                                                           "manualmente a sequência que jogaste.",
                                           icon="question")
         if escolha == "sim": self.comparar_com_chave_oficial()
         elif escolha != "não":
@@ -587,7 +530,8 @@ class InterfaceApp:
                 return
 
             # 📥 Pedir chave oficial
-            num_oficial_txt = simpledialog.askstring("Chave Oficial", "🎯 Números oficiais (5 separados por vírgulas):")
+            num_oficial_txt = simpledialog.askstring("Chave Oficial",
+                                                     "🎯 Números oficiais (5 separados por vírgulas):")
             estrela_oficial_txt = simpledialog.askstring("Chave Oficial",
                                                          "🎯 Estrelas oficiais (2 separadas por vírgulas):")
 
@@ -600,7 +544,8 @@ class InterfaceApp:
                 estrelas_oficiais = [int(e.strip()) for e in estrela_oficial_txt.split(",") if e.strip().isdigit()]
                 if len(numeros_oficiais) != 5 or len(estrelas_oficiais) != 2:
                     self.texto_historico.insert("end",
-                                                "⚠️ Erro: introduz exatamente 5 números e 2 estrelas na chave oficial.\n\n")
+                                                "⚠️ Erro: introduz exatamente 5 números e 2 estrelas na chave "
+                                                "oficial.\n\n")
                     return
             except AttributeError:
                 self.texto_historico.insert("end", "⚠️ Erro ao processar a chave oficial.\n\n")
@@ -613,18 +558,23 @@ class InterfaceApp:
             total_e = sum(e in estrelas_oficiais for e in estrelas_escolhidas_txt)
 
             # 🖼️ Inserir no histórico
-            self.texto_historico.insert("end", f"🧮 Comparação com chave oficial ({data_txt}):\n", "titulo")
+            self.texto_historico.insert("end", f"🧮 Comparação com chave oficial ({data_txt}):\n",
+                                        "titulo")
             self.texto_historico.insert("end",
-                                        f"\n🔮 Chave registada manualmente: {', '.join(map(str, num_escolhidos_txt))} + {', '.join(map(str, estrelas_escolhidas_txt))}\n")
+                                        f"\n🔮 Chave registada manualmente: {', '.join(map(str, num_escolhidos_txt))}"
+                                        f" + {', '.join(map(str, estrelas_escolhidas_txt))}\n")
             self.texto_historico.insert("end",
-                                        f"\n🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n")
+                                        f"\n🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} +"
+                                        f" {', '.join(map(str, estrelas_oficiais))}\n")
             self.texto_historico.insert("end", f"\n✅ Acertos: {total_n} números, {total_e} estrelas\n")
 
             if all(n in numeros_oficiais for n in num_escolhidos_txt):
-                self.texto_historico.insert("end", "\n🎯 Quinteto completo de números acertado!\n", "numeros_certos")
+                self.texto_historico.insert("end", "\n🎯 Quinteto completo de números acertado!\n",
+                                            "numeros_certos")
 
             if all(e in estrelas_oficiais for e in estrelas_escolhidas_txt):
-                self.texto_historico.insert("end", "\n🌟 Par completo de estrelas acertado!\n", "par_estrela_certo")
+                self.texto_historico.insert("end", "\n🌟 Par completo de estrelas acertado!\n",
+                                            "par_estrela_certo")
 
             if all(n in numeros_oficiais for n in num_escolhidos_txt) & all(
                     e in estrelas_oficiais for e in estrelas_escolhidas_txt):
@@ -640,17 +590,181 @@ class InterfaceApp:
             )
             self.resultado.config(text=texto_resultado)
 
-    def importar_ficheiro(self):
-        caminho = filedialog.askopenfilename(
-            title="Seleciona o ficheiro Excel",
-            filetypes=[("Ficheiros Excel", "*.xlsx *.xls")]
-        )
+
+    @staticmethod
+    def atualizar_resultados_automaticamente():
+        try:
+            file_id = "1fVvlpxDhtOVJvdjllDCRhiqNCgaTqFCS"
+            url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
+
+            # Diretório seguro para escrita
+            pasta_destino = os.path.join(os.path.expanduser("~"), "EuroMillions")
+            os.makedirs(pasta_destino, exist_ok=True)
+
+            caminho_ficheiro = os.path.join(pasta_destino, "resultados_euromilhoes.xlsx")
+
+            response = requests.get(url)
+            response.raise_for_status()
+
+            with open(caminho_ficheiro, "wb") as f:
+                f.write(response.content)
+
+            print("✅ Ficheiro atualizado com sucesso.")
+            return caminho_ficheiro
+
+        except Exception as e:
+            print(f"❌ Erro ao atualizar ficheiro: {e}")
+            return None
+
+    def atualizar_resultados(self):
+        caminho = self.__class__.atualizar_resultados_automaticamente()
         if caminho:
             try:
                 self.simulador = EuroMillionsMasterWizard(caminho)
-                self.resultado.config(text="✅ Ficheiro carregado com sucesso.")
+                self.resultado.config(text="✅ Resultados atualizados e ficheiro carregado.")
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao carregar ficheiro:\n{e}")
+        else:
+            messagebox.showerror("Erro", "Não foi possível atualizar os resultados.")
+
+    @staticmethod
+    def obter_estado_ficheiro(caminho):
+        estado = {
+            "valido": False,
+            "erro": "",
+            "sorteios": 0,
+            "colunas": [],
+            "chave": [],
+            "estrelas": [],
+            "data_ultima_chave": "",
+            "ultima_atualizacao": "",
+            "caminho": caminho
+        }
+
+        try:
+            def normalizar(texto):
+                return unicodedata.normalize("NFKD", str(texto)).encode("ASCII",
+                                                                        "ignore").decode().lower()
+
+            def encontrar_coluna(dataframe, termo_base, indice):
+                termo = f"{termo_base} {indice}"
+                alternativas = [
+                    termo,
+                    str(indice),
+                    f"{termo_base}{indice}".lower(),
+                    f"{termo_base} {indice}".lower(),
+                    f"n{indice}", f"s{indice}", f"num {indice}", f"estrela {indice}"
+                ]
+                for col in dataframe.columns:
+                    col_normalizado = normalizar(col)
+                    if any(alt in col_normalizado for alt in alternativas):
+                        return col
+                return None
+
+            def extrair_valor(registro, col):
+                if col is None:
+                    return 0
+                try:
+                    dado = registro[col]
+                    if pd.isna(dado):
+                        return 0
+                    return int(str(dado).strip())
+                except (KeyError, ValueError, TypeError):
+                    return 0
+
+            df = pd.read_excel(caminho, skiprows=1)
+            df.columns = df.columns.map(str)  # força todas as colunas a serem 'strings'
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+
+            # Depuração
+            print("\n📋 Tipos de colunas:", [type(col) for col in df.columns])
+            print("\n📋 Colunas originais:", df.columns.tolist())
+
+            estado["colunas"] = list(df.columns)
+            estado["sorteios"] = len(df)
+
+            # Detecta coluna de data
+            coluna_data = next(
+                (col for col in df.columns if any(term in col.lower() for term in ["data", "date", "dia", "draw"])),
+                None
+            )
+            print(f"\n🕒 Coluna de data reconhecida: {coluna_data}")   # Depuração
+            if not coluna_data and "Arquivo" in df.columns:
+                df["Date"] = pd.to_datetime(df["Arquivo"], errors="coerce")
+                coluna_data = "Date"
+
+            if not coluna_data:
+                raise ValueError(f"❌ Nenhuma coluna de data encontrada. Colunas disponíveis: {df.columns.tolist()}")
+
+            df[coluna_data] = pd.to_datetime(df[coluna_data], errors="coerce")
+            df = df.dropna(subset=[coluna_data])
+
+            # Identifica colunas de números e estrelas
+            colunas_numeros = [encontrar_coluna(df, "", i) for i in range(1, 6)]
+            colunas_estrelas = [encontrar_coluna(df, "star", i) for i in range(1, 3)]
+            colunas_numeros = [col for col in colunas_numeros if col]
+            colunas_estrelas = [col for col in colunas_estrelas if col]
+
+            if len(colunas_numeros) < 5 or len(colunas_estrelas) < 2:
+                raise ValueError("❌ Colunas de números ou estrelas incompletas. Verifica o ficheiro.")
+
+            df_filtrado = df.dropna(subset=colunas_numeros + colunas_estrelas)
+            df_filtrado = df_filtrado[(df_filtrado[colunas_numeros + colunas_estrelas] != 0).all(axis=1)]
+            df_ordenado = df_filtrado.sort_values(coluna_data, ascending=False)
+
+            for _, linha in df_ordenado.iterrows():
+                numeros_validos = all(extrair_valor(linha, col) >= 1 for col in colunas_numeros)
+                estrelas_validas = all(extrair_valor(linha, col) >= 1 for col in colunas_estrelas)
+                if numeros_validos and estrelas_validas:
+                    ultima_linha = linha
+                    break
+            else:
+                raise ValueError("❌ Nenhuma linha válida com números e estrelas encontrada.")
+
+            estado["chave"] = [extrair_valor(ultima_linha, col) for col in colunas_numeros]
+            estado["estrelas"] = [extrair_valor(ultima_linha, col) for col in colunas_estrelas]
+            estado["data_ultima_chave"] = ultima_linha[coluna_data].strftime("%d-%m-%Y")
+            estado["valido"] = True
+
+        except (FileNotFoundError, ValueError, KeyError, TypeError, pd.errors.ParserError):
+            estado["erro"] = traceback.format_exc()
+            print("⚠️ Erro capturado:\n", estado["erro"])
+
+        if os.path.exists(caminho):
+            mod_time = os.path.getmtime(caminho)
+            estado["ultima_atualizacao"] = datetime.fromtimestamp(mod_time).strftime("%d-%m-%Y %H:%M")
+        else:
+            estado["ultima_atualizacao"] = "Ficheiro não encontrado"
+
+        return estado
+
+    def mostrar_estado(self):
+        estado = self.__class__.obter_estado_ficheiro("dados/resultados_euromilhoes.xlsx")
+
+        if estado["valido"]:
+            chave = estado["chave"]
+            estrelas = estado["estrelas"]
+            data = estado["data_ultima_chave"]
+
+            texto = (
+                f"📁 Ficheiro: {os.path.basename(estado['caminho'])}\n"
+                f"🕒 Última atualização: {estado['ultima_atualizacao']}\n"
+                f"📊 Sorteios carregados: {estado['sorteios']}\n"
+                f"\n🎯 Última chave sorteada ({data}):\n"
+                f"🔢 Números: {', '.join(map(str, chave))}\n"
+                f"✨ Estrelas: {', '.join(map(str, estrelas))}\n"
+                f"✅ Estrutura válida: Sim\n"
+            )
+        else:
+            texto = (
+                f"📁 Ficheiro: {os.path.basename(estado['caminho'])}\n"
+                f"🕒 Última atualização: {estado['ultima_atualizacao']}\n"
+                f"⚠️ Estrutura inválida ou erro ao ler ficheiro\n"
+                f"🧾 Detalhes do erro: {estado['erro']}"
+            )
+
+        self.resultado.config(text=texto)
 
     def exportar_previsoes(self):
         if not self.historico_previsoes:
@@ -687,7 +801,8 @@ class InterfaceApp:
                         if isinstance(previsao, dict):
                             linha = (
                                 f"{idx}: Números → {previsao['N1']}, {previsao['N2']}, {previsao['N3']}, "
-                                f"{previsao['N4']}, {previsao['N5']} | Estrelas → {previsao['Estrela 1']}, {previsao['Estrela 2']}"
+                                f"{previsao['N4']}, {previsao['N5']} | Estrelas → {previsao['Estrela 1']},"
+                                f" {previsao['Estrela 2']}"
                             )
                         else:
                             linha = f"{idx}: {previsao}"
