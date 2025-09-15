@@ -1,6 +1,7 @@
 import pandas as pd
 from collections import defaultdict
 
+
 class EuroMillionsMasterWizard:
     def __init__(self, caminho_excel):
         self.df = pd.read_excel(caminho_excel, skiprows=1)
