@@ -4,24 +4,22 @@
 ![Licença](https://img.shields.io/badge/licença-CC--BY--NC--ND%204.0-lightgrey)
 ![Python](https://img.shields.io/badge/python-3.11+-yellow)
 
-**Versão 1.4**  
+**Versão 1.5**  
 Nesta versão do EuroMillions Master Wizard pode destacar-se as melhorias funcionais e implementação de novas funcionalidades, garantindo também robustez, manutenção e inovação.
 
 ![splash](splash.png)
 
 ---
 
-## 🚀 Novidades na v1.4:
+## 🚀 Novidades na v1.5:
 
 ### 🔧 Melhorias Funcionais
-- Exportação de previsões em Excel e PDF;
-- Remoção de duplicação na "📊 Análise da frequência histórica:", na previsão de padrão sequencial markoviana;
-- Correção de posições da "🔮 Sequência prevista:";
-- Adição de espaçamento entre linhas, de forma a facilitar a leitura e interpretação dos resultados ao utilizador.
+- Correção dos bugs nas atualizações automáticas;
+- Remoção de redundâncias a nível linguístico, na previsão sequencial markoviana;
+
 
 ### 📍 Novas funcionalidades:
-- Opção para sair do programa, caso o utilizador pretenda;
-- 🌓 Modo escuro (Dark Mode) e adição de outros temas à escolha do utilizador.
+- Atualização automática do histórico de sorteios do jogo EuroMillions
 
 ---
 
@@ -44,12 +42,11 @@ Em desenvolvimento:
 
 ---
 
-## 🚀 Como usar
+## 🚀 Como instalar e usar pela primeira vez
 
 1. **Descarrega o instalador** da [última versão aqui](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
-2. Executa o ficheiro `Setup.exe` (para atualização automática, caso tenhas instalado previamente o software) ou extrai a pasta `.zip` do software e executa o ficheiro `Setup.exe`, caso instales e utilizes pela primeira vez.
-
-4. Abre o programa e começa a explorar as previsões!
+2. Executa o ficheiro `Setup.exe`
+3. Executa o programa e começa a fazer jogadas!
 
 > ⚠️ Requisitos: Windows 10 ou superior
 
