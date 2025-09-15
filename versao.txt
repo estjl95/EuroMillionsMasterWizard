@@ -1,4 +1,4 @@
-versao=1.4
+versao=1.5
 link=https://github.com/estjl95/EuroMillionsMasterWizard/releases/download/v1.4/Setup.exe
-data=2025-07-18
+data= Por definir
 descricao=Atualizado com novas funcionalidades e correções efetuadas no software.
