@@ -1,6 +1,7 @@
 📦 EuroMillions Master Wizard — Changelog v1.5
 
 Data de lançamento: 15/09/2025
+
 Versão: v1.5
 
 🔧 Novidades e Melhorias:
