@@ -92,4 +92,4 @@ Não modificar sem autorização prévia do autor.
 
 ## 📜 Licença
 
-Este projeto está licenciado sob os termos da [Creative Commons BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+Este software está licenciado sob os termos da [Creative Commons BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/).
