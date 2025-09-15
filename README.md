@@ -38,7 +38,7 @@ Tens uma sugestão ou encontraste um bug?
 
 Em desenvolvimento:
 
-> An English version of this `README.md` will soon be available under `README_en.md`, featuring full instructions, screenshots, and international formatting.
+> An English version of this `README.md` will soon be available under `README_en.md`, featuring full instructions and international formatting.
 
 ---
 
