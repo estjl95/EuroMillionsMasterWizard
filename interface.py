@@ -646,19 +646,34 @@ class InterfaceApp:
                 return unicodedata.normalize("NFKD", str(texto)).encode("ASCII",
                                                                         "ignore").decode().lower()
 
-            def encontrar_coluna(dataframe, termo_base, indice):
-                termo = f"{termo_base} {indice}"
-                alternativas = [
-                    termo,
-                    str(indice),
-                    f"{termo_base}{indice}".lower(),
-                    f"{termo_base} {indice}".lower(),
-                    f"n{indice}", f"s{indice}", f"num {indice}", f"estrela {indice}"
-                ]
+            def encontrar_coluna(dataframe, tipo, indice):
+                if tipo == "estrela":
+                    alternativas = [
+                        f"star {indice}",
+                        f"star{indice}",
+                        f"estrela {indice}",
+                        f"estrela{indice}",
+                        f"s{indice}",
+                        f"e{indice}"
+                    ]
+                else:
+                    alternativas = [
+                        f"{indice}",
+                        f"n{indice}",
+                        f"num {indice}",
+                        f"numero {indice}"
+                    ]
+
                 for col in dataframe.columns:
                     col_normalizado = normalizar(col)
-                    if any(alt in col_normalizado for alt in alternativas):
+                    if any(alt == col_normalizado for alt in alternativas):
                         return col
+
+                # Depuração
+                print("🔢 Colunas de números:", colunas_numeros)
+                print("✨ Colunas de estrelas:", colunas_estrelas)
+                print("📄 Primeira linha de dados:", df_ordenado.iloc[0][colunas_numeros + colunas_estrelas].to_dict())
+
                 return None
 
             def extrair_valor(registro, col):
@@ -701,10 +716,13 @@ class InterfaceApp:
             df = df.dropna(subset=[coluna_data])
 
             # Identifica colunas de números e estrelas
-            colunas_numeros = [encontrar_coluna(df, "", i) for i in range(1, 6)]
-            colunas_estrelas = [encontrar_coluna(df, "star", i) for i in range(1, 3)]
+            colunas_numeros = [encontrar_coluna(df, "numero", i) for i in range(1, 6)]
+            colunas_estrelas = [encontrar_coluna(df, "estrela", i) for i in range(1, 3)]
             colunas_numeros = [col for col in colunas_numeros if col]
             colunas_estrelas = [col for col in colunas_estrelas if col]
+
+            print("🔢 Colunas de números:", colunas_numeros)
+            print("✨ Colunas de estrelas:", colunas_estrelas)
 
             if len(colunas_numeros) < 5 or len(colunas_estrelas) < 2:
                 raise ValueError("❌ Colunas de números ou estrelas incompletas. Verifica o ficheiro.")
@@ -740,7 +758,8 @@ class InterfaceApp:
         return estado
 
     def mostrar_estado(self):
-        estado = self.__class__.obter_estado_ficheiro("dados/resultados_euromilhoes.xlsx")
+        caminho = os.path.join(os.path.expanduser("~"), "EuroMillions", "resultados_euromilhoes.xlsx")
+        estado = self.__class__.obter_estado_ficheiro(caminho)
 
         if estado["valido"]:
             chave = estado["chave"]
