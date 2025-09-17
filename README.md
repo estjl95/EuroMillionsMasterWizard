@@ -15,7 +15,8 @@ Nesta versão do EuroMillions Master Wizard pode destacar-se as melhorias funcio
 
 ### 🔧 Melhorias Funcionais
 - Correção de bugs nas atualizações automáticas;
-- Remoção de redundâncias na previsão de padrões sequenciais markovianos.
+- Remoção de redundâncias na previsão de padrões sequenciais markovianos;
+- Correção de bugs nas atualizações dos resultados do jogo.
 
 
 ### 📍 Novas funcionalidades:
