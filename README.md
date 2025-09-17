@@ -14,12 +14,12 @@ Nesta versão do EuroMillions Master Wizard pode destacar-se as melhorias funcio
 ## 🚀 Novidades na v1.5:
 
 ### 🔧 Melhorias Funcionais
-- Correção dos bugs nas atualizações automáticas;
+- Correção de bugs nas atualizações automáticas;
 - Remoção de redundâncias na previsão sequencial markoviana;
 
 
 ### 📍 Novas funcionalidades:
-- Atualização automática do histórico de sorteios do jogo EuroMillions
+- Atualização automática do histórico de sorteios do jogo EuroMillions.
 
 ---
 
