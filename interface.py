@@ -10,6 +10,7 @@ import requests
 import os
 import unicodedata
 import traceback
+import json
 from atualizador import verificar_atualizacao
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from simulador import EuroMillionsMasterWizard
@@ -17,6 +18,16 @@ from scipy.stats import poisson
 from collections import Counter
 from fpdf import FPDF
 from datetime import datetime
+
+IDIOMAS_DISPONIVEIS = {
+    "pt": "🇵🇹 PT",
+    "en": "🇬🇧 EN",
+    "fr": "🇫🇷 FR",
+    "it": "🇮🇹 IT",
+    "de": "🇩🇪 DE",
+    "es": "🇪🇸 ES",
+    "tr": "🇹🇷 TR"
+}
 
 
 class InterfaceApp:
@@ -26,8 +37,8 @@ class InterfaceApp:
 
         self.modo_escuro_ativo = True
 
-        self.root.title("EuroMillions Master Wizard v1.5")
-        self.root.geometry("540x520")
+        self.root.title("EuroMillions Master Wizard v1.6")
+        self.root.geometry("1080x920")
 
         self.simulador = EuroMillionsMasterWizard("dados/resultados_euromilhoes.xlsx")
         self.historico_previsoes = []
@@ -42,10 +53,27 @@ class InterfaceApp:
             "Estrela 2": "Star 2"
         }
 
+        # Subtítulos
+        self.label_utilitarios_titulo = None
+        self.label_previsao_markov = None
+        self.label_comparar_chaves = None
+        self.label_seleciona_posicao = None
+        self.label_poisson_titulo = None
+
+        self.posicoes_traduzidas = {}
+
+        # Carregar idioma padrão
+        self.textos = self.carregar_textos("pt")
+
+        self.valores_poisson_numeros = []
+        self.observadas_poisson_numeros = []
+        self.valores_poisson_estrelas = []
+        self.observadas_poisson_estrelas = []
+
         # Título
         self.label_titulo = ttk.Label(
             self.root,
-            text="🔢 EuroMillions Master Wizard v1.5",
+            text="🔢 EuroMillions Master Wizard v1.6",
             font=("Segoe UI", 16, "bold")
         )
         self.label_titulo.pack(pady=10)
@@ -62,12 +90,14 @@ class InterfaceApp:
         self.tab_acertos = ttk.Frame(self.tabs)
         self.tab_estatisticas = ttk.Frame(self.tabs)
         self.tab_utilitarios = ttk.Frame(self.tabs)
+        self.tab_idiomas = ttk.Frame(self.tabs)
         self.tab_sair = ttk.Frame(self.tabs)
 
         self.tabs.add(self.tab_previsoes, text="🔮 Previsões")
         self.tabs.add(self.tab_acertos, text="✅ Acertos")
         self.tabs.add(self.tab_estatisticas, text="📊 Estatísticas")
         self.tabs.add(self.tab_utilitarios, text="📁 Utilitários")
+        self.tabs.add(self.tab_idiomas, text="🌎 Idiomas")
         self.tabs.add(self.tab_sair, text="🚪 Sair")
 
         self.combo_estatistica = ttk.Combobox(self.tab_estatisticas, values=list(self.posicoes.keys()),
@@ -82,6 +112,18 @@ class InterfaceApp:
         self.combo_estatistica = ttk.Combobox(self.tab_estatisticas, values=list(self.posicoes.keys()),
                                               state="readonly")
 
+        # Idiomas
+        self.combo_idioma = ttk.Combobox(
+            self.tab_idiomas,
+            values=list(IDIOMAS_DISPONIVEIS.values()),
+            state="readonly"
+        )
+        self.combo_idioma.set(IDIOMAS_DISPONIVEIS["pt"])
+        self.combo_idioma.pack(pady=10)
+        self.combo_idioma.bind("<<ComboboxSelected>>", lambda e: self.mudar_idioma(
+            self.obter_codigo_idioma(self.combo_idioma.get())
+        ))
+
         # Canvas para mostrar gráfico
         self.canvas_poisson = tk.Canvas(self.tab_estatisticas, width=720, height=440)  # ✅ canvas puro
 
@@ -91,6 +133,9 @@ class InterfaceApp:
         self.botao_exportar = ttk.Button(self.tab_utilitarios)
         self.botao_atualizar = ttk.Button(self.tab_utilitarios)
         self.botao_tema = ttk.Button(self.tab_utilitarios)
+
+        # Outros idiomas
+        self.botao_idiomas = ttk.Button(self.tab_idiomas)
 
         # Sair do programa
         self.botao_sair = ttk.Button(self.tab_sair)
@@ -127,84 +172,148 @@ class InterfaceApp:
             self.modo_escuro_ativo = True
             self.botao_tema.config(text="🌙 Modo Escuro")
 
+    @staticmethod
+    def carregar_textos(idioma="pt"):
+        caminho = os.path.join("lang", f"{idioma}.json")
+        with open(caminho, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    @staticmethod
+    def obter_codigo_idioma(texto_selecionado):
+        for codigo, nome in IDIOMAS_DISPONIVEIS.items():
+            if nome == texto_selecionado:
+                return codigo
+        return "pt", "en", "fr", "it", "de", "es", "tr"
+
+    def mudar_idioma(self, idioma):
+        self.textos = self.carregar_textos(idioma)
+        self.atualizar_interface()
+
+        # Depuração
+        print(self.textos["label_utilitarios_titulo"])
+        print("Idioma atualizado para:", idioma)
+        print("Novo texto:", self.textos["label_utilitarios_titulo"])
+
+    def atualizar_interface(self):
+        self.label_titulo.config(text=self.textos["titulo"])
+        if self.label_utilitarios_titulo:
+            self.label_utilitarios_titulo.config(
+                text=self.textos.get("label_utilitarios_titulo", "Temas e outras opções:")
+            )
+        self.label_previsao_markov.config(text=self.textos.get("label_previsao_markov"))
+        self.label_comparar_chaves.config(text=self.textos.get("label_comparar_chaves"))
+        self.label_seleciona_posicao.config(text=self.textos.get("label_seleciona_posicao"))
+        self.label_poisson_titulo.config(text=self.textos.get("label_poisson_titulo"))
+        self.label_utilitarios_titulo.config(text=self.textos.get("label_utilitarios_titulo"))
+        self.botao_multi_prever.config(
+            text=self.textos.get("botao_multi_prever", "🔮 Prever sequências")
+        )
+        self.botao_comparar.config(
+            text=self.textos.get("botao_comparar", "🧮 Verificar acertos")
+        )
+        self.botao_estatisticas.config(text=self.textos["botao_estatisticas"])
+        self.botao_poisson.config(text=self.textos["botao_poisson"])
+        self.botao_poisson_estrelas.config(text=self.textos["botao_poisson_estrelas"])
+        self.botao_importar.config(text=self.textos["botao_importar"])
+        self.botao_estado.config(text=self.textos["botao_estado"])
+        self.botao_exportar.config(text=self.textos["botao_exportar"])
+        self.botao_atualizar.config(
+            text=self.textos.get("botao_atualizar", "🔍 Verificar atualizações")
+        )
+        self.botao_tema.config(text=self.textos["botao_tema"])
+        self.botao_idiomas.config(text=self.textos["botao_idiomas"])
+        self.botao_sair.config(text=self.textos["botao_sair"])
+        self.tabs.tab(self.tab_previsoes, text=self.textos["tab_previsoes"])
+        self.tabs.tab(self.tab_acertos, text=self.textos["tab_acertos"])
+        self.tabs.tab(self.tab_estatisticas, text=self.textos["tab_estatisticas"])
+        self.tabs.tab(self.tab_utilitarios, text=self.textos["tab_utilitarios"])
+        self.tabs.tab(self.tab_idiomas, text=self.textos["tab_idiomas"])
+        self.tabs.tab(self.tab_sair, text=self.textos["tab_sair"])
+
     def fechar_programa(self):
-        if messagebox.askokcancel("Confirmar saída", "Tens a certeza que pretendes sair?"):
+        titulo = self.textos.get("msg_confirmar_saida_titulo", "Confirmar saída")
+        mensagem = self.textos.get("msg_confirmar_saida_texto", "Tens a certeza que pretendes sair?")
+        if messagebox.askokcancel(titulo, mensagem):
             self.root.quit()
             sys.exit()
 
     def criar_widgets(self):
         # 🔮 Previsão sequencial completa
-
-        ttk.Label(
+        self.label_previsao_markov = ttk.Label(
             self.tab_previsoes,
-            text="Prever padrões sequenciais com a Cadeia de Markov:",
+            text=self.textos.get("label_previsao_markov", "Prever padrões sequenciais com a Cadeia de Markov:"),
             font=("Segoe UI", 10, "bold")
-        ).pack(pady=10)
+        )
+        self.label_previsao_markov.pack(pady=10)
 
-        self.botao_multi_prever.config(
-            text="🔮 Prever sequências",
+        self.botao_multi_prever = tk.Button(
+            self.tab_previsoes,
+            text=self.textos.get("botao_multi_prever", "🔮 Prever sequências"),
             command=self.prever_sequencia
         )
         self.botao_multi_prever.pack(pady=5)
 
         # ✅ Comparação de acertos
-
-        ttk.Label(
+        self.label_comparar_chaves = ttk.Label(
             self.tab_acertos,
-            text="Comparar a chave jogada com a chave sorteada:",
+            text=self.textos.get("label_comparar_chaves", "Comparar a chave jogada com a chave sorteada:"),
             font=("Segoe UI", 10, "bold")
-        ).pack(pady=10)
+        )
+        self.label_comparar_chaves.pack(pady=10)
 
-        self.botao_comparar.config(
-            text="🧮 Verificar acertos",
+        self.botao_comparar = tk.Button(
+            self.tab_acertos,
+            text=self.textos.get("botao_comparar", "🧮 Verificar acertos"),
             command=self.comparar_com_chave_oficial
         )
         self.botao_comparar.pack(pady=5)
 
         # 📊 Estatísticas — Posição
-        ttk.Label(
+        self.label_seleciona_posicao = ttk.Label(
             self.tab_estatisticas,
-            text="Seleciona a posição:",
+            text=self.textos.get("label_seleciona_posicao", "Seleciona a posição"),
             font=("Segoe UI", 10, "bold")
-        ).pack(pady=(15, 5))
+        )
+        self.label_seleciona_posicao.pack(pady=(15, 5))
 
         self.combo_estatistica.pack(pady=5)
         self.combo_estatistica.current(0)
 
         self.botao_estatisticas.config(
-            text="📊 Consultar",
+            text=self.textos.get("botao_estatisticas", "📊 Consultar"),
             command=self.mostrar_estatisticas
         )
         self.botao_estatisticas.pack(pady=(5, 15))
 
         # 📊 Título da secção Poisson
-        ttk.Label(
+        self.label_poisson_titulo = ttk.Label(
             self.tab_estatisticas,
-            text="Distribuição de Poisson (últimos 100 sorteios):",
+            text=self.textos.get("label_poisson_titulo", "Distribuição de Poisson (últimos 100 sorteios):"),
             font=("Segoe UI", 10, "bold")
-        ).pack(pady=(5, 5))
+        )
+        self.label_poisson_titulo.pack(pady=(5, 5))
 
         self.botao_poisson.config(
-            text="📊 Números",
+            text=self.textos.get("botao_poisson", "📊 Números"),
             command=self.mostrar_poisson
         )
         self.botao_poisson.pack(pady=5)
 
         self.botao_poisson_estrelas.config(
-            text="🌟 Estrelas",
+            text=self.textos.get("botao_poisson_estrelas", "🌟 Estrelas"),
             command=self.mostrar_poisson_estrelas
         )
         self.botao_poisson_estrelas.pack(pady=5)
 
-        # 📈 Canvas para exibir gráfico (caso uses TkAgg ou substitua por plt.show())
         self.canvas_poisson.pack(pady=(10, 15))
 
         # 📁 Utilitários
-        ttk.Label(
+        self.label_utilitarios_titulo = ttk.Label(
             self.tab_utilitarios,
-            text="Temas e outras opções:",
+            text=self.textos.get("label_utilitarios_titulo", "Temas e outras opções:"),
             font=("Segoe UI", 10, "bold")
-        ).pack(pady=10)
+        )
+        self.label_utilitarios_titulo.pack(pady=10)
 
         self.botao_importar.config(
             text="📁 Atualizar histórico de sorteios EuroMillions",
@@ -222,7 +331,8 @@ class InterfaceApp:
         )
         self.botao_estado.pack(pady=5)
 
-        self.botao_atualizar = tk.Button(text="🔍 Verificar atualizações", command=lambda: verificar_atualizacao())
+        self.botao_atualizar = tk.Button(text="🔍 Verificar atualizações",
+                                         command=lambda: verificar_atualizacao(self.textos))
         self.botao_atualizar.pack(pady=5)
 
         self.botao_tema = ttk.Button(
@@ -241,29 +351,58 @@ class InterfaceApp:
         self.botao_sair.pack(pady=10)
 
     def mostrar_estatisticas(self):
-        posicao_nome = self.combo_estatistica.get()
-        if not posicao_nome:
-            messagebox.showinfo("Info", "Seleciona uma posição para visualizar estatísticas.")
+        posicao_nome_traduzido = self.combo_estatistica.get()
+        if not posicao_nome_traduzido:
+            alerta = self.textos.get("msg_estatisticas_alerta", "Seleciona uma posição para visualizar estatísticas.")
+            messagebox.showinfo("Info", alerta)
             return
 
-        coluna = self.posicoes[posicao_nome]
+        # 🔁 Mapeamento reverso entre nomes traduzidos e originais
+        self.posicoes_traduzidas = {}
+        valores_posicoes = []
+
+        self.posicoes_traduzidas.clear()
+        for chave in self.posicoes.keys():
+            if "Estrela" in chave:
+                chave_traduzida = chave.replace("Estrela", self.textos.get("label_estrela", "Estrela"))
+            else:
+                chave_traduzida = chave
+            self.posicoes_traduzidas[chave_traduzida] = chave
+            valores_posicoes.append(chave_traduzida)
+
+        self.combo_estatistica["values"] = valores_posicoes
+
+        # 🔍 Obter nome original da posição
+        posicao_nome_original = self.posicoes_traduzidas.get(posicao_nome_traduzido)
+        if not posicao_nome_original:
+            messagebox.showinfo("Info", self.textos.get("msg_estatisticas_alerta"))
+            return
+
+        coluna = self.posicoes[posicao_nome_original]
 
         try:
             stats = self.simulador.estatisticas_por_coluna(coluna)
-            texto = f"📊 Estatísticas para {posicao_nome}:\n"
-            texto += f"\nMédia: {stats['media']}\n"
-            texto += "\nTop 10 mais frequentes:\n"
+
+            texto = self.textos.get("msg_estatisticas_titulo", "📊 Estatísticas para {posicao}:").format(
+                posicao=posicao_nome_traduzido)
+            texto += "\n" + self.textos.get("msg_estatisticas_media", "Média: {media}").format(media=stats["media"])
+            texto += "\n\n" + self.textos.get("msg_estatisticas_top10", "Top 10 mais frequentes:") + "\n"
+
             for num, freq in stats["top_10"].items():
-                texto += f"\n  {num}: {freq}x\n"
+                texto += f"\n  {num}: {freq}x"
 
             self.texto_historico.insert("end", texto + "\n\n")
             self.texto_historico.see("end")
+
         except Exception as e:
-            messagebox.showerror("Erro", f"Não foi possível calcular estatísticas:\n{e}")
+            titulo = self.textos.get("msg_estatisticas_erro_titulo", "Erro")
+            texto_erro = self.textos.get("msg_estatisticas_erro_texto",
+                                         "Não foi possível calcular estatísticas:\n{erro}")
+            texto_erro = texto_erro.replace("{erro}", str(e))
+            messagebox.showerror(titulo, texto_erro)
 
     def mostrar_poisson(self):
         try:
-            # Lê o ficheiro
             df = pd.read_excel("dados/resultados_euromilhoes.xlsx", header=1)
             df.columns = [str(c) for c in df.columns]
 
@@ -278,56 +417,50 @@ class InterfaceApp:
             lambda_val = np.mean(observadas)
             esperada = poisson.pmf(observadas, mu=lambda_val) * sum(observadas)
 
-            # Limpar Canvas anterior
             for child in self.canvas_poisson.winfo_children():
                 child.destroy()
 
-            # Criar gráfico ampliado
             fig, ax = plt.subplots(figsize=(7.2, 4.4), dpi=100)
             cmap = plt.get_cmap("viridis")
-
-            # Índice da barra mais frequente
             max_index = np.argmax(observadas)
 
-            # Paleta de cores com destaque em 'tomato' para o mais frequente
             colors = [
                 "tomato" if i == max_index else cmap(i / len(valores))
                 for i in range(len(valores))
             ]
 
-            # Gráfico de barras observadas
-            ax.bar(valores, observadas, color=colors, label="Frequência Observada")
+            ax.bar(valores, observadas, color=colors,
+                   label=self.textos.get("poisson_legenda_observada", "Frequência Observada"))
 
-            # 👉 Rótulo numérico em cada barra
             for i, v in enumerate(observadas):
                 x = float(valores[i])
-                y = v + max(
-                    observadas) * 0.02  # desloca proporcionalmente
+                y = v + max(observadas) * 0.02
                 ax.text(x=x, y=y, s=str(v), ha="center", fontsize=8)
 
-            # Curva esperada de Poisson
-            ax.plot(valores, esperada, "r--", linewidth=2, label="Poisson Esperada")
+            ax.plot(valores, esperada, "r--", linewidth=2,
+                    label=self.textos.get("poisson_legenda_esperada", "Poisson Esperada"))
 
-            # Estilo visual
-            ax.set_title("Distribuição de Poisson — Últimos 100 sorteios")
-            ax.set_xlabel("Número")
-            ax.set_ylabel("Ocorrências")
+            ax.set_title(self.textos.get("poisson_titulo_numeros", "Distribuição de Poisson — Últimos 100 sorteios"))
+            ax.set_xlabel(self.textos.get("poisson_label_x_numeros", "Número"))
+            ax.set_ylabel(self.textos.get("poisson_label_y", "Ocorrências"))
             ax.legend()
             ax.grid(alpha=0.3)
-            plt.show()  # 👉 Abre o gráfico numa janela separada
+            plt.show()
 
-            # Mostrar resumo textual no histórico
-            texto_resumo = f"📈 Média esperada por número: {lambda_val:.2f}\n"
-            texto_resumo += f"\n🔍 Número mais frequente: {valores[np.argmax(observadas)]} ({max(observadas)}x)\n"
+            texto_resumo = self.textos.get("poisson_resumo_numeros").format(
+                media=f"{lambda_val:.2f}",
+                numero=valores[max_index],
+                frequencia=max(observadas)
+            )
             self.texto_historico.insert("end", texto_resumo + "\n")
             self.texto_historico.see("end")
 
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao gerar gráfico de Poisson:\n{e}")
+            erro_txt = self.textos.get("poisson_erro_numeros", "Erro ao gerar gráfico de Poisson:\n{erro}")
+            messagebox.showerror("Erro", erro_txt.replace("{erro}", str(e)))
 
     def mostrar_poisson_estrelas(self):
         try:
-            # Lê o ficheiro
             df = pd.read_excel("dados/resultados_euromilhoes.xlsx", header=1)
             df.columns = [str(c) for c in df.columns]
 
@@ -342,7 +475,6 @@ class InterfaceApp:
             lambda_val = np.mean(observadas)
             esperada = poisson.pmf(observadas, mu=lambda_val) * sum(observadas)
 
-            # Criar gráfico
             fig, ax = plt.subplots(figsize=(7.2, 4.4), dpi=100)
             cmap = plt.get_cmap("plasma")
             max_index = np.argmax(observadas)
@@ -352,33 +484,36 @@ class InterfaceApp:
                 for i in range(len(valores))
             ]
 
-            ax.bar(valores, observadas, color=colors, label="Frequência Observada")
+            ax.bar(valores, observadas, color=colors,
+                   label=self.textos.get("poisson_legenda_observada", "Frequência Observada"))
 
             for i, v in enumerate(observadas):
-                x: float = float(valores[i])
-                y: float = float(v) + 0.5   # type: ignore
-                s: str = str(v)
-                ax.text(x, y, s, ha="center", fontsize=8)
+                x = float(valores[i])
+                y = float(v) + 0.5  # type: ignore
+                ax.text(x, y, str(v), ha="center", fontsize=8)
 
-            ax.plot(valores, esperada, "r--", linewidth=2, label="Poisson Esperada")
+            ax.plot(valores, esperada, "r--", linewidth=2,
+                    label=self.textos.get("poisson_legenda_esperada", "Poisson Esperada"))
 
-            ax.set_title("Distribuição de Poisson — Estrelas (últimos 100 sorteios)")
-            ax.set_xlabel("Estrela")
-            ax.set_ylabel("Ocorrências")
+            ax.set_title(
+                self.textos.get("poisson_titulo_estrelas", "Distribuição de Poisson — Estrelas (últimos 100 sorteios)"))
+            ax.set_xlabel(self.textos.get("poisson_label_x_estrelas", "Estrela"))
+            ax.set_ylabel(self.textos.get("poisson_label_y", "Ocorrências"))
             ax.legend()
             ax.grid(alpha=0.3)
-
-            # Mostrar em janela separada
             plt.show()
 
-            # Texto informativo no histórico
-            texto = f"🌟 Média esperada por estrela: {lambda_val:.2f}\n"
-            texto += f"\n✨ Estrela mais frequente: {valores[max_index]} ({max(observadas)}x)\n"
+            texto = self.textos.get("poisson_resumo_estrelas").format(
+                media=f"{lambda_val:.2f}",
+                estrela=valores[max_index],
+                frequencia=max(observadas)
+            )
             self.texto_historico.insert("end", texto + "\n")
             self.texto_historico.see("end")
 
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao gerar gráfico de Poisson (estrelas):\n{e}")
+            erro_txt = self.textos.get("poisson_erro_estrelas", "Erro ao gerar gráfico de Poisson (estrelas):\n{erro}")
+            messagebox.showerror("Erro", erro_txt.replace("{erro}", str(e)))
 
     def prever_sequencia(self):
         previsoes = {}
@@ -433,16 +568,21 @@ class InterfaceApp:
         self.mostrar_destinos_provaveis()
 
     def mostrar_destinos_provaveis(self):
-        self.texto_historico.insert("end", "🔍 Destinos prováveis para cada posição, no jogo "
-                                           "(dados atualizados):\n")
+        titulo = self.textos.get("msg_destinos_titulo",
+                                 "🔍 Destinos prováveis para cada posição, no jogo (dados atualizados):")
+        self.texto_historico.insert("end", titulo + "\n")
 
         for nome, coluna in self.posicoes.items():
             transicoes = self.simulador.transicoes_percentuais.get(coluna, {})
-            # A origem pode ser o valor que saiu na chave anterior ou o usado no 'loop'
             for origem in transicoes:
                 destinos = transicoes[origem]
                 mais_fortes = sorted(destinos.items(), key=lambda x: x[1], reverse=True)[:5]
-                linha = f"\n🔸 {nome} ({origem}) → " + ", ".join(f"{d} ({p}%)" for d, p in mais_fortes)
+                destinos_formatados = ", ".join(f"{d} ({p}%)" for d, p in mais_fortes)
+
+                nome_traduzido = nome.replace("Estrela", self.textos.get("label_estrela", "Estrela"))
+                linha_template = self.textos.get("msg_destinos_linha", "🔸 {posicao} ({origem}) → {destinos}")
+                linha = linha_template.format(posicao=nome_traduzido, origem=origem, destinos=destinos_formatados)
+
                 self.texto_historico.insert("end", linha + "\n")
 
         self.texto_historico.insert("end", "\n")
@@ -501,103 +641,98 @@ class InterfaceApp:
         self.texto_historico.see("end")
 
     def comparar_com_chave_oficial(self):
-        escolha = messagebox.askquestion( "Comparar com a chave sorteada", "Queres comparar com a sequência "
-                                                                           "prevista pelo sistema (Markov)?\n"
-                                                                           "Se responderes 'Não', poderás introduzir "
-                                                                           "manualmente a sequência que jogaste.",
-                                          icon="question")
-        if escolha == "sim": self.comparar_com_chave_oficial()
+        pergunta = self.textos.get("msg_comparar_pergunta")
+        titulo = self.textos.get("msg_comparar_titulo")
+        escolha = messagebox.askquestion(titulo, pergunta, icon="question")
+
+        if escolha == "sim":
+            self.comparar_com_chave_oficial()
+            return
         elif escolha != "não":
             # 📥 Pedir sequência prevista
-            num_escolhidos_txt = simpledialog.askstring("5 números (Manualmente)",
-                                                  "🔢 Números previstos (5 separados por vírgulas):")
-            estrelas_escolhidas_txt = simpledialog.askstring("2 estrelas (Manualmente)",
-                                                      "🌟 Estrelas previstas (2 separadas por vírgulas):")
+            num_escolhidos_txt = simpledialog.askstring("5 números", self.textos.get("msg_input_numeros"))
+            estrelas_escolhidas_txt = simpledialog.askstring("2 estrelas", self.textos.get("msg_input_estrelas"))
 
             if not num_escolhidos_txt or not estrelas_escolhidas_txt:
-                self.texto_historico.insert("end", "⚠️ Operação cancelada pelo utilizador.\n\n")
+                self.texto_historico.insert("end", self.textos.get("msg_cancelado") + "\n\n")
                 return
 
             try:
                 num_escolhidos_txt = [int(n.strip()) for n in num_escolhidos_txt.split(",") if n.strip().isdigit()]
-                estrelas_escolhidas_txt = [int(e.strip()) for e in estrelas_escolhidas_txt.split(",") if e.strip().isdigit()]
+                estrelas_escolhidas_txt = [int(e.strip()) for e in estrelas_escolhidas_txt.split(",") if
+                                           e.strip().isdigit()]
                 if len(num_escolhidos_txt) != 5 or len(estrelas_escolhidas_txt) != 2:
-                    self.texto_historico.insert("end",
-                                                "⚠️ Erro: introduz exatamente 5 números e 2 estrelas na previsão.\n\n")
+                    self.texto_historico.insert("end", self.textos.get("msg_erro_previsao") + "\n\n")
                     return
-            except AttributeError:
-                self.texto_historico.insert("end", "⚠️ Erro ao processar a sequência prevista.\n\n")
+            except TypeError:
+                self.texto_historico.insert("end", self.textos.get("msg_erro_processamento_previsao") + "\n\n")
                 return
 
             # 📥 Pedir chave oficial
-            num_oficial_txt = simpledialog.askstring("Chave Oficial",
-                                                     "🎯 Números oficiais (5 separados por vírgulas):")
-            estrela_oficial_txt = simpledialog.askstring("Chave Oficial",
-                                                         "🎯 Estrelas oficiais (2 separadas por vírgulas):")
+            num_oficial_txt = simpledialog.askstring("Chave Oficial", self.textos.get("msg_input_oficial_numeros"))
+            estrela_oficial_txt = simpledialog.askstring("Chave Oficial", self.textos.get("msg_input_oficial_estrelas"))
 
             if not num_oficial_txt or not estrela_oficial_txt:
-                self.texto_historico.insert("end", "⚠️ Operação cancelada pelo utilizador.\n\n")
+                self.texto_historico.insert("end", self.textos.get("msg_cancelado") + "\n\n")
                 return
 
             try:
                 numeros_oficiais = [int(n.strip()) for n in num_oficial_txt.split(",") if n.strip().isdigit()]
                 estrelas_oficiais = [int(e.strip()) for e in estrela_oficial_txt.split(",") if e.strip().isdigit()]
                 if len(numeros_oficiais) != 5 or len(estrelas_oficiais) != 2:
-                    self.texto_historico.insert("end",
-                                                "⚠️ Erro: introduz exatamente 5 números e 2 estrelas na chave "
-                                                "oficial.\n\n")
+                    self.texto_historico.insert("end", self.textos.get("msg_erro_oficial") + "\n\n")
                     return
-            except AttributeError:
-                self.texto_historico.insert("end", "⚠️ Erro ao processar a chave oficial.\n\n")
+            except TypeError:
+                self.texto_historico.insert("end", self.textos.get("msg_erro_processamento_oficial") + "\n\n")
                 return
 
             data_txt = "Resultado"
-
-            # ✅ Contagem de acertos
             total_n = sum(n in numeros_oficiais for n in num_escolhidos_txt)
             total_e = sum(e in estrelas_oficiais for e in estrelas_escolhidas_txt)
 
-            # 🖼️ Inserir no histórico
-            self.texto_historico.insert("end", f"🧮 Comparação com chave oficial ({data_txt}):\n",
+            self.texto_historico.insert("end",
+                                        self.textos.get("msg_comparacao_titulo", "").format(data=data_txt) + "\n",
                                         "titulo")
-            self.texto_historico.insert("end",
-                                        f"\n🔮 Chave registada manualmente: {', '.join(map(str, num_escolhidos_txt))}"
-                                        f" + {', '.join(map(str, estrelas_escolhidas_txt))}\n")
-            self.texto_historico.insert("end",
-                                        f"\n🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} +"
-                                        f" {', '.join(map(str, estrelas_oficiais))}\n")
-            self.texto_historico.insert("end", f"\n✅ Acertos: {total_n} números, {total_e} estrelas\n")
+            self.texto_historico.insert("end", self.textos.get("msg_chave_manual", "").format(
+                numeros=", ".join(map(str, num_escolhidos_txt)),
+                estrelas=", ".join(map(str, estrelas_escolhidas_txt))
+            ) + "\n")
+            self.texto_historico.insert("end", self.textos.get("msg_chave_oficial", "").format(
+                numeros=", ".join(map(str, numeros_oficiais)),
+                estrelas=", ".join(map(str, estrelas_oficiais))
+            ) + "\n")
+            self.texto_historico.insert("end", self.textos.get("msg_acertos", "").format(
+                total_n=total_n, total_e=total_e
+            ) + "\n")
 
             if all(n in numeros_oficiais for n in num_escolhidos_txt):
-                self.texto_historico.insert("end", "\n🎯 Quinteto completo de números acertado!\n",
-                                            "numeros_certos")
+                self.texto_historico.insert("end", self.textos.get("msg_quinteto") + "\n", "numeros_certos")
 
             if all(e in estrelas_oficiais for e in estrelas_escolhidas_txt):
-                self.texto_historico.insert("end", "\n🌟 Par completo de estrelas acertado!\n",
-                                            "par_estrela_certo")
+                self.texto_historico.insert("end", self.textos.get("msg_par_estrelas") + "\n", "par_estrela_certo")
 
-            if all(n in numeros_oficiais for n in num_escolhidos_txt) & all(
+            if all(n in numeros_oficiais for n in num_escolhidos_txt) and all(
                     e in estrelas_oficiais for e in estrelas_escolhidas_txt):
-                self.texto_historico.insert("end", "\n✅ Parabéns! Ganhaste o jackpot do EuroMillions!\n",
+                self.texto_historico.insert("end", self.textos.get("msg_jackpot") + "\n",
                                             "numeros_certos, par_estrela_certo")
 
             self.texto_historico.insert("end", "\n")
             self.texto_historico.see("end")
 
             texto_resultado = (
-                f"\n🎯 Chave oficial: {', '.join(map(str, numeros_oficiais))} + {', '.join(map(str, estrelas_oficiais))}\n"
-                f"\n✅ Acertos: {total_n} números, {total_e} estrelas"
+                    self.textos.get("msg_chave_oficial", "").format(
+                        numeros=", ".join(map(str, numeros_oficiais)),
+                        estrelas=", ".join(map(str, estrelas_oficiais))
+                    ) + "\n" +
+                    self.textos.get("msg_acertos", "").format(total_n=total_n, total_e=total_e)
             )
             self.resultado.config(text=texto_resultado)
 
-
-    @staticmethod
-    def atualizar_resultados_automaticamente():
+    def atualizar_resultados(self):
         try:
             file_id = "1fVvlpxDhtOVJvdjllDCRhiqNCgaTqFCS"
             url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
 
-            # Diretório seguro para escrita
             pasta_destino = os.path.join(os.path.expanduser("~"), "EuroMillions")
             os.makedirs(pasta_destino, exist_ok=True)
 
@@ -609,23 +744,59 @@ class InterfaceApp:
             with open(caminho_ficheiro, "wb") as f:
                 f.write(response.content)
 
-            print("✅ Ficheiro atualizado com sucesso.")
+            # Depuração
+            print(self.textos.get("atualizacao_sucesso", "✅ Ficheiro atualizado com sucesso."))
+
+            # Janela pop-up
+            messagebox.showinfo(
+                title=self.textos.get("atualizacao_titulo", "Atualização"),
+                message=self.textos.get("atualizacao_sucesso", "✅ Ficheiro atualizado com sucesso.")
+            )
+
+            for coluna in self.posicoes.values():
+                self.simulador.gerar_cadeia_markov(coluna)
+
+            messagebox.showinfo(
+                title=self.textos.get("atualizacao_titulo", "Atualização"),
+                message=self.textos.get("msg_markov_reconstruida",
+                                        "✅ A matriz de transição Markov foi atualizada com os novos dados.")
+            )
+
+            self.atualizar_poisson()
+
+            messagebox.showinfo(
+                title=self.textos.get("atualizacao_titulo", "Atualização"),
+                message=self.textos.get("poisson_atualizada",
+                                        "📊 Os dados da distribuição de Poisson foram atualizados.")
+            )
+
             return caminho_ficheiro
 
         except Exception as e:
-            print(f"❌ Erro ao atualizar ficheiro: {e}")
+            erro_txt = self.textos.get("atualizacao_erro", "❌ Erro ao atualizar ficheiro: {erro}")
+            print(erro_txt.replace("{erro}", str(e)))
             return None
 
-    def atualizar_resultados(self):
-        caminho = self.__class__.atualizar_resultados_automaticamente()
-        if caminho:
-            try:
-                self.simulador = EuroMillionsMasterWizard(caminho)
-                self.resultado.config(text="✅ Resultados atualizados e ficheiro carregado.")
-            except Exception as e:
-                messagebox.showerror("Erro", f"Erro ao carregar ficheiro:\n{e}")
-        else:
-            messagebox.showerror("Erro", "Não foi possível atualizar os resultados.")
+    @staticmethod
+    def calcular_poisson(df, colunas):
+        df_recente = df.tail(100)
+        valores = df_recente[colunas].values.flatten()
+        contagem = pd.Series(valores).value_counts().sort_index()
+        return contagem.index.astype(int), contagem.values
+
+    def atualizar_poisson(self):
+        try:
+            df = pd.read_excel("dados/resultados_euromilhoes.xlsx", header=1)
+            df.columns = [str(c) for c in df.columns]
+
+            self.valores_poisson_numeros, self.observadas_poisson_numeros = self.calcular_poisson(df,
+                                                                                                  ["1", "2", "3", "4",
+                                                                                                   "5"])
+            self.valores_poisson_estrelas, self.observadas_poisson_estrelas = self.calcular_poisson(df, ["Star 1",
+                                                                                                         "Star 2"])
+
+        except Exception as e:
+            print(f"Erro ao atualizar dados de Poisson: {e}")
 
     @staticmethod
     def obter_estado_ficheiro(caminho):
@@ -721,8 +892,11 @@ class InterfaceApp:
             colunas_numeros = [col for col in colunas_numeros if col]
             colunas_estrelas = [col for col in colunas_estrelas if col]
 
+            # Depuração
+            print(f"📁 Ficheiro: {os.path.basename(estado['caminho'])}\n")
             print("🔢 Colunas de números:", colunas_numeros)
             print("✨ Colunas de estrelas:", colunas_estrelas)
+            print(f"✅ Estrutura válida: Sim\n")
 
             if len(colunas_numeros) < 5 or len(colunas_estrelas) < 2:
                 raise ValueError("❌ Colunas de números ou estrelas incompletas. Verifica o ficheiro.")
@@ -767,27 +941,37 @@ class InterfaceApp:
             data = estado["data_ultima_chave"]
 
             texto = (
-                f"📁 Ficheiro: {os.path.basename(estado['caminho'])}\n"
-                f"🕒 Última atualização: {estado['ultima_atualizacao']}\n"
-                f"📊 Sorteios carregados: {estado['sorteios']}\n"
-                f"\n🎯 Última chave sorteada ({data}):\n"
-                f"🔢 Números: {', '.join(map(str, chave))}\n"
-                f"✨ Estrelas: {', '.join(map(str, estrelas))}\n"
-                f"✅ Estrutura válida: Sim\n"
+                    self.textos.get("estado_valido_atualizacao", "🕒 Última atualização: {data}").format(
+                        data=estado["ultima_atualizacao"]) + "\n" +
+                    self.textos.get("estado_valido_sorteios", "📊 Sorteios carregados: {quantidade}").format(
+                        quantidade=estado["sorteios"]) + "\n\n" +
+                    self.textos.get("estado_valido_titulo_chave", "🎯 Última chave sorteada ({data}):").format(
+                        data=data) + "\n" +
+                    self.textos.get("estado_valido_numeros", "🔢 Números: {numeros}").format(
+                        numeros=", ".join(map(str, chave))) + "\n" +
+                    self.textos.get("estado_valido_estrelas", "✨ Estrelas: {estrelas}").format(
+                        estrelas=", ".join(map(str, estrelas))) + "\n"
             )
         else:
             texto = (
-                f"📁 Ficheiro: {os.path.basename(estado['caminho'])}\n"
-                f"🕒 Última atualização: {estado['ultima_atualizacao']}\n"
-                f"⚠️ Estrutura inválida ou erro ao ler ficheiro\n"
-                f"🧾 Detalhes do erro: {estado['erro']}"
+                    self.textos.get("estado_invalido_ficheiro", "📁 Ficheiro: {nome}").format(
+                        nome=os.path.basename(estado["caminho"])) + "\n" +
+                    self.textos.get("estado_invalido_atualizacao", "🕒 Última atualização: {data}").format(
+                        data=estado["ultima_atualizacao"]) + "\n" +
+                    self.textos.get("estado_invalido_erro_titulo",
+                                    "⚠️ Estrutura inválida ou erro ao ler ficheiro") + "\n" +
+                    self.textos.get("estado_invalido_erro_detalhes", "🧾 Detalhes do erro: {erro}").format(
+                        erro=estado["erro"])
             )
 
         self.resultado.config(text=texto)
 
     def exportar_previsoes(self):
         if not self.historico_previsoes:
-            messagebox.showinfo("Info", "Ainda não há previsões para exportar.")
+            messagebox.showinfo(
+                title=self.textos.get("exportar_titulo_dialogo", "Exportar"),
+                message=self.textos.get("exportar_alerta_vazia", "Ainda não há previsões para exportar.")
+            )
             return
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
@@ -796,17 +980,19 @@ class InterfaceApp:
         caminho = filedialog.asksaveasfilename(
             initialfile=nome_sugestao,
             defaultextension=".xlsx",
-            filetypes=[("Ficheiros Excel", "*.xlsx"), ("Ficheiros PDF", "*.pdf")],
-            title="Guardar previsões como..."
+            filetypes=[
+                (self.textos.get("label_excel", "Ficheiros Excel"), "*.xlsx"),
+                (self.textos.get("label_pdf", "Ficheiros PDF"), "*.pdf")
+            ],
+            title=self.textos.get("exportar_titulo_dialogo", "Guardar previsões como...")
         )
 
         if caminho:
             try:
-                # Exportar Excel
                 df = pd.DataFrame({
-                    "Previsão": self.historico_previsoes,
-                    "Versão": "v1.4",
-                    "Data": datetime.datetime.now().strftime("%d-%m-%Y")
+                    self.textos.get("exportar_excel_coluna_previsao", "Previsão"): self.historico_previsoes,
+                    self.textos.get("exportar_excel_coluna_versao", "Versão"): "v1.6",
+                    self.textos.get("exportar_excel_coluna_data", "Data"): datetime.datetime.now().strftime("%d-%m-%Y")
                 })
                 df.to_excel(caminho, index=False)
 
@@ -819,9 +1005,15 @@ class InterfaceApp:
                     for idx, previsao in enumerate(previsoes, 1):
                         if isinstance(previsao, dict):
                             linha = (
-                                f"{idx}: Números → {previsao['N1']}, {previsao['N2']}, {previsao['N3']}, "
-                                f"{previsao['N4']}, {previsao['N5']} | Estrelas → {previsao['Estrela 1']},"
-                                f" {previsao['Estrela 2']}"
+                                    f"{idx}: " +
+                                    self.textos.get("exportar_pdf_numeros",
+                                                    "Números → {n1}, {n2}, {n3}, {n4}, {n5}").format(
+                                        n1=previsao["N1"], n2=previsao["N2"], n3=previsao["N3"],
+                                        n4=previsao["N4"], n5=previsao["N5"]
+                                    ) + " | " +
+                                    self.textos.get("exportar_pdf_estrelas", "Estrelas → {e1}, {e2}").format(
+                                        e1=previsao["Estrela 1"], e2=previsao["Estrela 2"]
+                                    )
                             )
                         else:
                             linha = f"{idx}: {previsao}"
@@ -829,12 +1021,17 @@ class InterfaceApp:
 
                     pdf.output(caminho_pdf_1)
 
-                # Gerar caminho para PDF
                 caminho_pdf = caminho.replace(".xlsx", ".pdf")
-                # Exportar PDF
                 exportar_para_pdf(self.historico_previsoes, caminho_pdf)
 
-                messagebox.showinfo("Sucesso", "Previsões exportadas com sucesso em Excel e PDF!")
+                messagebox.showinfo(
+                    title=self.textos.get("exportar_titulo_dialogo", "Exportar"),
+                    message=self.textos.get("exportar_sucesso", "Previsões exportadas com sucesso em Excel e PDF!")
+                )
 
             except Exception as e:
-                messagebox.showerror("Erro", f"Erro ao exportar:\n{e}")
+                erro_txt = self.textos.get("exportar_erro", "Erro ao exportar:\n{erro}")
+                messagebox.showerror(
+                    title=self.textos.get("exportar_titulo_dialogo", "Exportar"),
+                    message=erro_txt.replace("{erro}", str(e))
+                )
