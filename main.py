@@ -57,8 +57,8 @@ def mostrar_splash(callback):
 
 
 def iniciar_app():
-    InterfaceApp(root, style)
-    verificar_atualizacao()
+    app = InterfaceApp(root, style)
+    verificar_atualizacao(app.textos)
 
 
 # 🖥️ Estilo global e root inicial
