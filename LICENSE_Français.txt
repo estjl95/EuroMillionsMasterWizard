@@ -1,0 +1,17 @@
+LICENCE D’UTILISATION – EuroMillions Master Wizard
+
+Ce logiciel est fourni gratuitement pour un usage personnel et éducatif.
+
+L’installation, l’exécution et le partage du programme sont autorisés, à condition que:
+
+• Il ne soit pas modifié sans l’autorisation de l’auteur;
+• Il ne soit pas vendu ni distribué à des fins commerciales;
+• Le crédit à l’auteur original soit conservé;
+
+Le programme est fourni "tel quel", sans aucune garantie, expresse ou implicite. L’auteur ne peut être tenu responsable des pertes, dommages ou résultats découlant de l’utilisation de ce logiciel.
+
+En installant ce programme, l’utilisateur accepte les termes de cette licence.
+
+Pour toute suggestion, question ou collaboration, contacter: estjl95@outlook.com
+
+© 2025 José Estácio
