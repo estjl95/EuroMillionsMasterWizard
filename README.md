@@ -179,8 +179,8 @@ Cette version de EuroMillions Master Wizard se distingue par ses améliorations 
 
 Vous avez une suggestion ou vous avez trouvé un bug?
 
-• 📩 Envoyez un e-mail: `estjl95@outlook.com`
-• 🐞 Ouvrez un ticket: [ici sur GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
+- 📩 Envoyez un e-mail: `estjl95@outlook.com`
+- 🐞 Ouvrez un ticket: [ici sur GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
 
 > Nous sommes toujours disponibles pour améliorer EuroMillions Master Wizard avec vous!
 
@@ -260,8 +260,8 @@ Questa versione di EuroMillions Master Wizard si distingue per i miglioramenti f
 
 Hai un suggerimento o hai trovato un bug?
 
-• 	📩 Invia un’e-mail: `estjl95@outlook.com`
-• 	🐞 Apri una segnalazione: [qui su GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
+- 	📩 Invia un’e-mail: `estjl95@outlook.com`
+- 	🐞 Apri una segnalazione: [qui su GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
 
 > Siamo sempre disponibili a migliorare EuroMillions Master Wizard insieme a te!
 
@@ -341,8 +341,8 @@ Diese Version von EuroMillions Master Wizard zeichnet sich durch funktionale Ver
 
 Hast du einen Vorschlag oder einen Fehler gefunden?
 
-• 📩 Sende eine E-Mail: `estjl95@outlook.com`
-• 🐞 Öffne ein Issue: [hier auf GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
+- 📩 Sende eine E-Mail: `estjl95@outlook.com`
+- 🐞 Öffne ein Issue: [hier auf GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
 
 > Wir sind jederzeit bereit, EuroMillions Master Wizard gemeinsam mit dir zu verbessern!
 
@@ -420,8 +420,8 @@ Esta versión de EuroMillions Master Wizard destaca por sus mejoras funcionales 
 
 ¿Tienes una sugerencia o encontraste un error?
 
-• 📩 Envía un correo: `estjl95@outlook.com`
-• 🐞 Abre un issue: [aquí en GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
+- 📩 Envía un correo: `estjl95@outlook.com`
+- 🐞 Abre un issue: [aquí en GitHub](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
 
 ---
 
@@ -499,8 +499,8 @@ Bu EuroMillions Master Wizard sürümü, işlevsel iyileştirmeleri ve yeni öze
 
 Bir öneriniz mi var veya bir hata mı buldunuz?
 
-• 📩 E-posta gönderin: `estjl95@outlook.com` 
-• 🐞 GitHub’da bir issue [açın: buradan](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
+- 📩 E-posta gönderin: `estjl95@outlook.com` 
+- 🐞 GitHub’da bir issue [açın: buradan](https://github.com/estjl95/EuroMillionsMasterWizard/issues)
 
 > EuroMillions Master Wizard’ı seninle birlikte geliştirmek için her zaman buradayız!
 
