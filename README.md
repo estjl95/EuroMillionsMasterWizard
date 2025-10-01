@@ -42,14 +42,6 @@ Tens uma sugestão ou encontraste um bug?
 
 ---
 
-## Como usar (para Android)
-
-![splash](Android_symbol.png)
-
-Brevemente disponível, aplicação em desenvolvimento.
-
----
-
 ## 📦 Instalação para programadores (sistema operativo Windows)
 
 ```bash
@@ -58,6 +50,15 @@ cd EuroMillionsMasterWizard
 pip install -r requirements.txt
 python main.py
 ```
+
+---
+
+## Como usar (para Android)
+
+![splash](Android_symbol.png)
+
+Brevemente disponível, aplicação em desenvolvimento.
+
 ---
 
 ### ⚠️ Aviso
