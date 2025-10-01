@@ -145,6 +145,12 @@ python main.py
 ```
 ---
 
+## How to use (for Android)
+
+Coming soon, development in progress.
+
+---
+
 ### ⚠️ Disclaimer
 
 This software is designed to effectively increase the chances of winning the jackpot. However, it does not guarantee profitable results nor does it replace the random factor, as the game is based on a stochastic process.
@@ -214,6 +220,12 @@ cd EuroMillionsMasterWizard
 pip install -r requirements.txt
 python main.py
 ```
+
+---
+
+## Comment utiliser (pour Android)
+
+Bientôt disponible — développement en cours.
 
 ---
 
@@ -298,6 +310,12 @@ python main.py
 
 ---
 
+## Come usare (per Android)
+
+In arrivo — sviluppo in corso.
+
+---
+
 ### ⚠️ Avviso
 
 Questo software è progettato per aumentare efficacemente le probabilità di vincere il jackpot. Tuttavia, non garantisce risultati redditizi né sostituisce il fattore casuale, poiché il gioco si basa su un processo stocastico.
@@ -376,6 +394,13 @@ cd EuroMillionsMasterWizard
 pip install -r requirements.txt
 python main.py
 ```
+
+---
+
+## Verwendung (für Android)
+
+Demnächst verfügbar — Entwicklung läuft.
+
 ---
 
 ### ⚠️ Hinweis
@@ -413,7 +438,7 @@ Dieses Projekt steht unter der Creative Commons BY-NC-ND 4.0 Lizenz.
 
 **🇪🇸 Español**
 
-*Versión 1.6*
+**Versión 1.6**
 Esta versión de EuroMillions Master Wizard destaca por sus mejoras funcionales y la incorporación de nuevas funcionalidades, garantizando robustez, mantenibilidad e innovación.
 
 ## 🚀 Actualizaciones v1.6:
@@ -453,6 +478,12 @@ cd EuroMillionsMasterWizard
 pip install -r requirements.txt
 python main.py
 ```
+
+---
+
+## Cómo usar (para Android)
+
+Próximamente — desarrollo en curso.
 
 ---
 
@@ -533,6 +564,12 @@ cd EuroMillionsMasterWizard
 pip install -r requirements.txt
 python main.py
 ```
+
+---
+
+## Nasıl kullanılır (Android için)
+
+Yakında geliyor — geliştirme devam ediyor.
 
 ---
 
