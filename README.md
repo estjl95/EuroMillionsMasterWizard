@@ -44,7 +44,7 @@ Tens uma sugestão ou encontraste um bug?
 
 ## Como usar (para Android)
 
-[splash](Android_symbol.png)
+![splash](Android_symbol.png)
 
 Brevemente disponível, aplicação em desenvolvimento.
 
