@@ -44,11 +44,13 @@ Tens uma sugestão ou encontraste um bug?
 
 ## Como usar (para Android)
 
+[splash](Android_symbol.png)
+
 Brevemente disponível, aplicação em desenvolvimento.
 
 ---
 
-## 📦 Instalação para programadores
+## 📦 Instalação para programadores (sistema operativo Windows)
 
 ```bash
 git clone https://github.com/estjl95/EuroMillionsMasterWizard.git
