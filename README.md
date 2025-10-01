@@ -135,8 +135,9 @@ Got a suggestion or did you find a bug?
 
 ---
 
+## 📦 Installation for Developers
+
 ```bash
-📦 Installation for Developers
 git clone https://github.com/estjl95/EuroMillionsMasterWizard.git
 cd EuroMillionsMasterWizard
 pip install -r requirements.txt
