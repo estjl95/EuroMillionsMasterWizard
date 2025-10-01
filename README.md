@@ -42,7 +42,7 @@ Tens uma sugestão ou encontraste um bug?
 
 ---
 
-## 🫩 🪉 🇨🇶 Como usar (para Android)
+## Como usar (para Android)
 
 Brevemente disponível, aplicação em desenvolvimento.
 
