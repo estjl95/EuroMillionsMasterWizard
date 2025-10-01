@@ -32,13 +32,19 @@ Tens uma sugestão ou encontraste um bug?
 
 ---
 
-## 🚀 Como usar
+## 🚀 Como usar (para Windows)
 
 1. **Descarrega o instalador** da [última versão aqui](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
 2. Executa o ficheiro `Setup.exe`
 3. Abre o programa e começa a explorar as previsões!
 
 > ⚠️ Requisitos: Windows 10 ou superior
+
+---
+
+## 🫩 🪉 🇨🇶 Como usar (para Android)
+
+Brevemente disponível, aplicação em desenvolvimento.
 
 ---
 
@@ -116,7 +122,7 @@ Got a suggestion or did you find a bug?
 
 ---
 
-## 🚀 How to Use
+## 🚀 How to Use (for Windows)
 
 1. 	**Download the installer** from the [latest release here](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
 2. 	Run the `Setup.exe` file
@@ -186,7 +192,7 @@ Vous avez une suggestion ou vous avez trouvé un bug?
 
 ---
 
-## 🚀 Comment utiliser
+## 🚀 Comment utiliser (pour Windows)
 
 1. **Téléchargez l’installateur** depuis la [dernière version ici](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
 2. Exécutez le fichier `Setup.exe`
@@ -267,7 +273,7 @@ Hai un suggerimento o hai trovato un bug?
 
 ---
 
-## 🚀 Come usare
+## 🚀 Come usare (para Windows)
 
 1. 	**Scarica l’installer** [dall’ultima versione qui](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
 2. 	Esegui il file `Setup.exe`
@@ -348,7 +354,7 @@ Hast du einen Vorschlag oder einen Fehler gefunden?
 
 ---
 
-## 🚀 Anwendung
+## 🚀 Anwendung (für Windows)
 
 1. 	**Lade den Installer herunter** von der [neuesten Version hier](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
 2. 	Führe die Datei `Setup.exe` aus
@@ -425,7 +431,7 @@ Esta versión de EuroMillions Master Wizard destaca por sus mejoras funcionales 
 
 ---
 
-## 🚀 Cómo usar
+## 🚀 Cómo usar (para Windows)
 
 1. 	**Descarga el instalador** desde la [última versión aquí](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
 2. 	Ejecuta el archivo `Setup.exe`
@@ -506,7 +512,7 @@ Bir öneriniz mi var veya bir hata mı buldunuz?
 
 ---
 
-## 🚀 Nasıl Kullanılır
+## 🚀 Nasıl Kullanılır (Windows'de için)
 1. 	Son sürümü [buradan indir](https://github.com/estjl95/EuroMillionsMasterWizard/releases)
 2. 	`Setup.exe` dosyasını çalıştırın
 3. 	Programı açın ve tahminlere başlayın!
